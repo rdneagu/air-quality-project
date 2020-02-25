@@ -1,11 +1,22 @@
 <template>
   <div id="app">
+    <Header></Header>
     <router-view/>
   </div>
 </template>
 
+<script>
+import Header from './components/Header.vue';
+
+export default {
+  components: {
+    Header,
+  },
+};
+</script>
+
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap');
+@import '@/scss/_fonts.scss';
 @import '@/scss/_normalize.scss';
 
 html, body, #app {
@@ -15,6 +26,7 @@ html, body, #app {
 #app {
   display: flex;
   flex-direction: column;
+  font-size: 18px;
   font-family: 'Noto Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
