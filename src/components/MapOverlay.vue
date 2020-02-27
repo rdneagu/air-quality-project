@@ -60,8 +60,4 @@ export default {
   }
 }
 
-.fade-io-quick-enter-active { transition: opacity .4s ease; }
-.fade-io-quick-leave-active { transition: opacity .4s ease; }
-.fade-io-quick-enter, .fade-io-quick-leave-to { opacity: 0; }
-
 </style>

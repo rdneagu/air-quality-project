@@ -16,8 +16,9 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/scss/_fonts.scss';
-@import '@/scss/_normalize.scss';
+@import './scss/_fonts.scss';
+@import './scss/_normalize.scss';
+@import './scss/fx';
 
 html, body, #app {
   min-height: 100vh;
