@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint",
-    "api": "node ./server/index.js"
+    "start": "node ./server/index.js"
   },
   "dependencies": {
     "@amcharts/amcharts4": "^4.8.9",
