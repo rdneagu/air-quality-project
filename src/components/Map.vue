@@ -92,7 +92,7 @@ export default {
   },
   mounted() {
     this.$nextTick(async () => {
-      const worldSeriesResult = await axios.post('/api/getWorld');
+      const worldSeriesResult = await axios.get('https://pollution-backend.herokuapp.com/map');
       const map = am4core.create(this.$refs.map, am4maps.MapChart);
       this.map.model = map;
       map.projection = new am4maps.projections.Mercator();
@@ -124,41 +124,32 @@ export default {
       this.map.series.countrySeries = countrySeries;
 
       worldSeries.events.on('datavalidated', async () => {
-        const chunks = _.chunk(worldSeries.data, 20);
-        console.log(chunks);
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < chunks.length; i++) {
-          const promisesChunks = [];
-          // eslint-disable-next-line no-plusplus
-          for (let j = 0; j < chunks[i].length; j++) {
-            console.log(j);
-            promisesChunks.push(axios.get(`https://pollution-backend.herokuapp.com/statsCountry?country=${chunks[i][j].id}`));
-          }
-          // eslint-disable-next-line no-await-in-loop
-          const feed = await Promise.all(promisesChunks);
-          console.log(feed);
+        try {
+          const promises = _.map(worldSeries.data, (r) => {
+            const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+            return response;
+          });
+          const aqifeed = await Promise.all(promises);
+          const pols = {};
+          _.forEach(aqifeed, (aqi, id) => {
+            _.forEach(aqi.data.data.iaqi, (iaqi, key) => {
+              console.log(key);
+              pols[key] = (pols[key] || 0) + 1;
+            });
+            if (aqi.data.status === 'ok') {
+              worldSeries.dataItems.values[id].mapPolygon.fill = am4core.color(getColorForAQI(aqi.data.data.aqi, 1)).lighten(-0.5);
+              worldSeries.data[id].aqi = aqi.data.data.aqi;
+            } else {
+              worldSeries.data[id].aqi = 'No data recorded nearby';
+            }
+          });
+          console.log(pols);
+          this.map.state.initiating = false;
+          this.map.state.loading = false;
+          this.showWorld();
+        } catch (e) {
+          console.error(e);
         }
-        getColorForAQI(5);
-        // const promises = _.forEach(chunks, (chunk) => {
-        //   _.forEach(chunk)
-        //   // const response = axios.get(`https://api.waqi.info/feed/${r.capital.name}/?token=8701730daa0d71aa3377b66c7bbc1280e7c909f5`);
-        //   const response = axios.get(`https://pollution-backend.herokuapp.com/statsCountry?country=${r.id}`);
-        //   return response;
-        // });
-        // const aqifeed = await Promise.all(promises);
-        // _.forEach(aqifeed, (aqi, id) => {
-        //   console.log(aqi);
-        //   if (aqi.status !== 500) {
-        //     console.log(console.log(aqi));
-        //     worldSeries.dataItems.values[id].mapPolygon.fill = am4core.color(getColorForAQI(50, 1)).lighten(-0.5);
-        //     // worldSeries.data[id].aqi = aqi.data.data.aqi;
-        //   } else {
-        //     worldSeries.data[id].aqi = 'No data recorded nearby';
-        //   }
-        // });
-        this.map.state.initiating = false;
-        this.map.state.loading = false;
-        this.showWorld();
       });
     });
   },
@@ -169,9 +160,9 @@ export default {
     configSeries(series) {
       series.useGeodata = true;
       series.tooltip.background.fill = am4core.color('#01120b');
-      series.tooltip.background.stroke = am4core.color('#5bc640');
+      series.tooltip.background.stroke = am4core.color('#357a24');
       series.tooltip.background.strokeWidth = 1;
-      series.tooltip.label.fill = am4core.color('#5bc640');
+      series.tooltip.label.fill = am4core.color('#357a24');
       series.tooltip.getFillFromObject = false;
       series.tooltip.autoTextColor = false;
     },
@@ -183,7 +174,7 @@ export default {
       polygon.nonScalingStroke = false;
       polygon.strokeOpacity = 0.8;
       polygon.fill = am4core.color('#000000');
-      polygon.stroke = am4core.color('#013220');
+      polygon.stroke = am4core.color('#01452c');
       polygon.propertyFields.fill = 'color';
       polygon.cursorOverStyle = am4core.MouseCursorStyle.pointer;
       const hsPolygon = polygon.states.create('hover');
@@ -239,7 +230,7 @@ export default {
           this.map.zoom.threshold = target.series.chart.zoomLevel;
           // If country is not cached, request data from the server and cache it for later use
           if (this.countries[id] === undefined) {
-            const countrySeriesResult = await axios.post('/api/getCountry', { country: id });
+            const countrySeriesResult = await axios.get(`https://pollution-backend.herokuapp.com/countryMap?countryCode=${id}`);
             this.countries[id] = { geodata: countrySeriesResult.data };
           }
           // Set the series geodata and show the country series
@@ -319,11 +310,13 @@ export default {
 .map-wrapper {
   position: relative;
   display: flex;
-  width: 100%;
-  height: 700px;
-  border: 1px solid $map-stroke-color;
+  border-top: 1px solid $map-stroke-color;
+  border-bottom: 1px solid $map-stroke-color;
   background-color: $map-bg-color;
   overflow: hidden;
+  .map-model {
+    flex: 1;
+  }
   .map-loading {
     position: absolute;
     top: 0;
@@ -346,10 +339,6 @@ export default {
       &:nth-child(2) { animation-delay: -0.5s }
       &:nth-child(3) { animation-delay: 0.0s }
     }
-  }
-  .map-model {
-    width: inherit;
-    height: inherit;
   }
 }
 

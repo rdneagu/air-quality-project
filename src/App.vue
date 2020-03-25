@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header></Header>
-    <router-view/>
+    <router-view class="page" />
   </div>
 </template>
 
@@ -16,25 +16,25 @@ export default {
 </script>
 
 <style lang="scss">
-@import './scss/_fonts.scss';
-@import './scss/_normalize.scss';
-@import './scss/fx';
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web:400,500,600,700&display=swap');
+@import './scss/_variables';
+@import './scss/_normalize';
+@import './scss/_fx';
 
 html, body, #app {
   min-height: 100vh;
   background-color: black;
 }
 #app {
-  display: flex;
+  display: grid;
+  grid-template-rows: 60px 1fr;
   flex-direction: column;
-  font-size: 18px;
-  font-family: 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-family: 'Titillium Web', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: lighten(teal, 10%);
+  color: $color-text;
   text-shadow: 1px 1px 1px black;
-
-  > * { flex: 1; }
 }
 </style>

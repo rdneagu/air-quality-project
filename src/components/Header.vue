@@ -10,7 +10,6 @@ export default {};
 
 <style lang="scss">
 header {
-  max-height: 50px;
   display: flex;
   align-items: center;
 }
