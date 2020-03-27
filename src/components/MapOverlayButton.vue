@@ -65,7 +65,8 @@ export default {
   .filter-color {
     position: absolute;
     top: 9px;
-    left: 19px;
+    left: calc(50% + 1px);
+    transform: translateX(-50%);
     height: 14px;
     width: 14px;
     z-index: -1;

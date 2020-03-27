@@ -1,7 +1,7 @@
 <template>
   <div class="map-wrapper" @mouseenter="showOverlay" @mouseleave="hideOverlay">
     <transition name="fade-io-quick" appear>
-      <div v-show="!map.state.initiating" class="map-model" ref="map"></div>
+      <div v-show="!map.state.initiating" class="map-model" ref="map" :style="polygonStrokeCSS"></div>
     </transition>
     <MapOverlay v-if="mapOverlay && !map.state.initiating" :func="map.func"></MapOverlay>
     <transition name="fade-io-quick" appear>
@@ -25,37 +25,6 @@ import MapOverlay from './MapOverlay.vue';
 
 am4core.useTheme(am4themesAnimated);
 
-const aqiColors = [
-  { aqi: 0, color: { r: 0x00, g: 0xaa, b: 0xff } },
-  { aqi: 25, color: { r: 0x00, g: 0xff, b: 0x00 } },
-  { aqi: 50, color: { r: 0xff, g: 0xff, b: 0x00 } },
-  { aqi: 100, color: { r: 0xff, g: 0x7f, b: 0x00 } },
-  { aqi: 150, color: { r: 0xff, g: 0x00, b: 0x00 } },
-  { aqi: 300, color: { r: 0x80, g: 0x00, b: 0x80 } },
-  { aqi: 1000, color: { r: 0x8b, g: 0x00, b: 0x00 } },
-];
-
-function getColorForAQI(aqi, alpha) {
-  let i;
-  for (i = 1; i < aqiColors.length - 1; i += 1) {
-    if (aqi < aqiColors[i].aqi) {
-      break;
-    }
-  }
-  const lower = aqiColors[i - 1];
-  const upper = aqiColors[i];
-  const range = upper.aqi - lower.aqi;
-  const rangeAqi = (aqi - lower.aqi) / range;
-  const aqiLower = 1 - rangeAqi;
-  const aqiUpper = rangeAqi;
-  const color = {
-    r: Math.floor(lower.color.r * aqiLower + upper.color.r * aqiUpper),
-    g: Math.floor(lower.color.g * aqiLower + upper.color.g * aqiUpper),
-    b: Math.floor(lower.color.b * aqiLower + upper.color.b * aqiUpper),
-  };
-  return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
-}
-
 export default {
   components: {
     MapOverlay,
@@ -77,83 +46,122 @@ export default {
           animation: undefined,
         },
         series: {
+          target: undefined,
           worldSeries: undefined,
           countrySeries: undefined,
-          imageSeries: undefined,
+        },
+        aq: {
+          list: {},
+        },
+        data: {
+          target: undefined,
+          world: [],
+          country: {},
         },
         state: {
           initiating: true,
           loading: true,
         },
+        stroke: '#01452c',
       },
       mapOverlay: false,
-      countries: {},
     };
   },
-  mounted() {
-    this.$nextTick(async () => {
-      const worldSeriesResult = await axios.get('https://pollution-backend.herokuapp.com/map');
-      const map = am4core.create(this.$refs.map, am4maps.MapChart);
-      this.map.model = map;
-      map.projection = new am4maps.projections.Mercator();
-      this.updateMinimumZoom();
-      map.minZoomLevel = this.map.zoom.min;
-      map.maxZoomLevel = this.map.zoom.max;
-      // World Map
-      const worldSeries = map.series.push(new am4maps.MapPolygonSeries());
-      this.configSeries(worldSeries);
-      worldSeries.geodata = worldSeriesResult.data;
-      const worldPolygon = worldSeries.mapPolygons.template;
-      this.configPolygon(worldPolygon);
-      worldPolygon.tooltipText = '{name}: ({aqi})';
-      // Country
-      const countrySeries = map.series.push(new am4maps.MapPolygonSeries());
-      this.configSeries(countrySeries);
-      const countryPolygon = countrySeries.mapPolygons.template;
-      this.configPolygon(countryPolygon);
-      // Event handler that triggers when the mousewheel is used
-      map.events.on('wheeldown', () => {
-        this.leaveCountry();
-      });
-      // Event handler that triggers when country is clicked
-      worldPolygon.events.on('hit', (ev) => {
-        this.enterCountry(ev.target);
-      });
-      // Save series in object variables
-      this.map.series.worldSeries = worldSeries;
-      this.map.series.countrySeries = countrySeries;
+  async mounted() {
+    await this.$nextTick();
 
-      worldSeries.events.on('datavalidated', async () => {
-        try {
-          const promises = _.map(worldSeries.data, (r) => {
-            const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
-            return response;
-          });
-          const aqifeed = await Promise.all(promises);
-          const pols = {};
-          _.forEach(aqifeed, (aqi, id) => {
-            _.forEach(aqi.data.data.iaqi, (iaqi, key) => {
-              console.log(key);
-              pols[key] = (pols[key] || 0) + 1;
-            });
-            if (aqi.data.status === 'ok') {
-              worldSeries.dataItems.values[id].mapPolygon.fill = am4core.color(getColorForAQI(aqi.data.data.aqi, 1)).lighten(-0.5);
-              worldSeries.data[id].aqi = aqi.data.data.aqi;
-            } else {
-              worldSeries.data[id].aqi = 'No data recorded nearby';
-            }
-          });
-          console.log(pols);
-          this.map.state.initiating = false;
-          this.map.state.loading = false;
-          this.showWorld();
-        } catch (e) {
-          console.error(e);
-        }
-      });
+    const worldSeriesResult = await axios.get('http://codegod.xyz:8090/map');
+    // const worldSeriesResult = await axios.get('/api/getWorld');
+    const map = am4core.create(this.$refs.map, am4maps.MapChart);
+    this.map.model = map;
+    map.projection = new am4maps.projections.Mercator();
+    this.updateMinimumZoom();
+    map.minZoomLevel = this.map.zoom.min;
+    map.maxZoomLevel = this.map.zoom.max;
+    // World Map
+    const worldSeries = map.series.push(new am4maps.MapPolygonSeries());
+    this.configSeries(worldSeries);
+    worldSeries.geodata = worldSeriesResult.data;
+    const worldPolygon = worldSeries.mapPolygons.template;
+    this.configPolygon(worldPolygon);
+    worldPolygon.tooltipText = '{name}: ({aqi})';
+    // Country
+    const countrySeries = map.series.push(new am4maps.MapPolygonSeries());
+    this.configSeries(countrySeries);
+    const countryPolygon = countrySeries.mapPolygons.template;
+    this.configPolygon(countryPolygon);
+    countryPolygon.tooltipText = '{name}: ({aqi})';
+    // Event handler that triggers when the mousewheel is used
+    map.events.on('wheeldown', () => {
+      this.leaveCountry();
+    });
+    // Event handler that triggers when country is clicked
+    worldPolygon.events.on('hit', (ev) => {
+      this.enterCountry(ev.target);
+    });
+    // Save series in object variables
+    this.map.series.worldSeries = worldSeries;
+    this.map.series.countrySeries = countrySeries;
+
+    worldSeries.events.on('datavalidated', async () => {
+      try {
+        const promises = _.map(worldSeries.data, (r) => {
+          const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+          // const response = axios.get(`http://codegod.xyz:8090/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
+          return response;
+        });
+        const aqifeed = await Promise.all(promises);
+        this.$set(this.map.data, 'world', _.map(aqifeed, (country, id) => {
+          const mapping = { id };
+          if (country.data.status === 'ok') {
+            return {
+              ...mapping,
+              aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
+              dominent: country.data.data.dominentpol,
+            };
+          }
+          return mapping;
+        }));
+        this.map.state.initiating = false;
+        this.map.state.loading = false;
+        this.showWorld();
+      } catch (e) {
+        console.error(e);
+      }
     });
   },
+  computed: {
+    polygonStrokeCSS() {
+      return { '--stroke': this.map.stroke };
+    },
+  },
   methods: {
+    updateAQIList() {
+      const aqiList = _.reduce(this.map.data.target, (acc, country) => {
+        acc = { ...acc || {}, ...country.aqi };
+        return acc;
+      }, {});
+      delete aqiList.smart;
+      this.$store.state.map.aqis = aqiList;
+    },
+    updateHeatMap() {
+      const filter = this.$store.getters.getSelected('filter') || 'smart';
+      const aqiNumbers = _.map(this.map.data.target, (country) => ((country.aqi && filter in country.aqi) ? country.aqi[filter].v : 0));
+      const [min, max] = [_.min(aqiNumbers), _.max(aqiNumbers)];
+      console.log(`min -> ${min}`);
+      console.log(`max -> ${max}`);
+      this.map.series.target.mapPolygons.template.stroke = am4core.color(this.$store.getters.getAQIColor(filter)).lighten(-0.5);
+      this.map.stroke = (am4core.color(this.$store.getters.getAQIColor(filter)).lighten(0.5)).rgba;
+      _.forEach(this.map.data.target, (country, id) => {
+        let tooltip = 'No data recorded for this Air Quality Index';
+        this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color('rgba(0, 0, 0, 1)');
+        if (country.aqi && filter in country.aqi) {
+          this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color(this.$store.getters.getAQIHeatColor(country.aqi[filter].v, min, max));
+          tooltip = `${filter}: ${country.aqi[filter].v} μ/mg`;
+        }
+        this.map.series.target.data[id].aqi = tooltip;
+      });
+    },
     /**
      * Default configuration for series
      */
@@ -171,14 +179,13 @@ export default {
      */
     configPolygon(polygon) {
       polygon.tooltipText = '{name}';
-      polygon.nonScalingStroke = false;
+      polygon.nonScalingStroke = true;
       polygon.strokeOpacity = 0.8;
+      polygon.strokeWidth = 0.4;
       polygon.fill = am4core.color('#000000');
       polygon.stroke = am4core.color('#01452c');
       polygon.propertyFields.fill = 'color';
       polygon.cursorOverStyle = am4core.MouseCursorStyle.pointer;
-      const hsPolygon = polygon.states.create('hover');
-      hsPolygon.properties.fill = am4core.color('#367B25');
     },
     /**
      * Shows the overlay
@@ -205,6 +212,7 @@ export default {
     showCountry() {
       this.map.series.worldSeries.hide();
       this.map.series.countrySeries.show();
+      this.updateHeatMap();
     },
     /**
      * Shows the world series and hides the country series
@@ -214,6 +222,10 @@ export default {
       this.cancelCountry();
       this.map.series.worldSeries.show();
       this.map.series.countrySeries.hide();
+      this.map.data.target = this.map.data.world;
+      this.map.series.target = this.map.series.worldSeries;
+      this.updateAQIList();
+      this.updateHeatMap();
     },
     /**
      * Zoom in to a specific country polygon and load the regions
@@ -223,21 +235,51 @@ export default {
       this.map.state.loading = true;
       this.map.zoom.animation = target.series.chart.zoomToMapObject(target);
       this.map.zoom.animation.events.once('animationended', async () => {
-        const { id } = target.dataItem.dataContext;
-        if (id) {
+        const code = target.dataItem.dataContext.id;
+        if (code) {
           target.isHover = false;
           // Set map zoom threshold to act as a portal back to world on zooming out beyond the threshold
           this.map.zoom.threshold = target.series.chart.zoomLevel;
           // If country is not cached, request data from the server and cache it for later use
-          if (this.countries[id] === undefined) {
-            const countrySeriesResult = await axios.get(`https://pollution-backend.herokuapp.com/countryMap?countryCode=${id}`);
-            this.countries[id] = { geodata: countrySeriesResult.data };
+          if (!this.$store.getters.getCache(`country_${code}`)) {
+            const response = await axios.get(`http://codegod.xyz:8090/countryMap?countryCode=${code}`);
+            // const response = await axios.get(`/api/getCountry?country=${code}`);
+            this.$store.commit('setCache', { name: `country_${code}`, data: response.data });
           }
           // Set the series geodata and show the country series
-          this.map.series.countrySeries.geodata = this.countries[id].geodata;
-          this.map.zoom.animation = undefined;
-          this.map.state.loading = false;
-          this.showCountry();
+          this.map.series.countrySeries.geodata = { ...this.$store.getters.getCache(`country_${code}`).data };
+          this.map.series.countrySeries.events.once('datavalidated', async () => {
+            if (!this.map.data.country[code]) {
+              try {
+                const promises = _.map(this.map.series.countrySeries.mapPolygons.values, (cityPolygon) => {
+                  const response = axios.get(`https://api.waqi.info/feed/geo:${cityPolygon.latitude};${cityPolygon.longitude}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+                  return response;
+                });
+                const aqifeed = await Promise.all(promises);
+                this.$set(this.map.data.country, code, _.map(aqifeed, (city, id) => {
+                  const mapping = { id };
+                  if (city.data.status === 'ok') {
+                    return {
+                      ...mapping,
+                      aqi: { ...city.data.data.iaqi, smart: { v: city.data.data.aqi } },
+                      dominent: city.data.data.dominentpol,
+                    };
+                  }
+                  return mapping;
+                }));
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
+            this.$set(this.map.data, 'target', this.map.data.country[code]);
+            this.$set(this.map.series, 'target', this.map.series.countrySeries);
+            this.map.zoom.animation = undefined;
+            this.map.state.loading = false;
+            this.updateAQIList();
+            this.updateHeatMap();
+            this.showCountry();
+          });
         }
       });
     },
@@ -301,6 +343,13 @@ export default {
       }
     },
   },
+  watch: {
+    '$store.state.selected.filter': async function filterChanged(to, from) {
+      if (to !== undefined && to !== from) {
+        this.updateHeatMap();
+      }
+    },
+  },
 };
 </script>
 
@@ -339,6 +388,9 @@ export default {
       &:nth-child(2) { animation-delay: -0.5s }
       &:nth-child(3) { animation-delay: 0.0s }
     }
+  }
+  svg g g g g g g g g g g g {
+    stroke: var(--stroke) !important;
   }
 }
 

@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import _ from 'lodash';
+
 import MapOverlayButton from './MapOverlayButton.vue';
 import MapOverlayDropdown from './MapOverlayDropdown.vue';
 import FlexSpacer from './FlexSpacer.vue';
@@ -29,16 +31,18 @@ export default {
     FlexSpacer,
   },
   props: ['func'],
-  data() {
-    return {
-      filterDropdown: {
-        smart: { text: 'SMART', icon: 'filter-card', filterColor: '#ff6347', default: true },
-        o2: { text: 'O2', icon: 'filter-card', filterColor: 'red' },
-        pm5: { text: 'PM5', icon: 'filter-card', filterColor: 'royalblue' },
-        pm10: { text: 'PM10', icon: 'filter-card', filterColor: 'green' },
-        co2: { text: 'CO2', icon: 'filter-card', filterColor: 'yellow' },
-      },
-    };
+  computed: {
+    filterDropdown() {
+      const filters = { smart: { text: 'SMART', icon: 'filter-card', filterColor: this.$store.getters.getAQIColor('smart'), default: true } };
+      _.forEach(this.$store.state.map.aqis, (aqi, id) => {
+        filters[id] = {
+          text: id.toUpperCase(),
+          icon: 'filter-card',
+          filterColor: this.$store.getters.getAQIColor(id),
+        };
+      });
+      return filters;
+    },
   },
   methods: {
     toggleSidebar() {

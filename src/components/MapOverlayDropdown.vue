@@ -41,7 +41,7 @@ export default {
   },
   created() {
     if (!this.getSelected) {
-      this.$store.commit('updateSelected', { id: this.dropdownId, item: findDefault(this.items) });
+      this.$store.commit('setSelected', { id: this.id, item: findDefault(this.items) });
     }
   },
   computed: {
@@ -49,7 +49,7 @@ export default {
       return `dropdown-${this.id}`;
     },
     getSelected() {
-      return this.$store.getters.getSelected(this.dropdownId);
+      return this.$store.getters.getSelected(this.id);
     },
     isDisabled() {
       return (this.disabled) ? 'disabled' : false;
@@ -60,7 +60,7 @@ export default {
       return `${this.id}-${item}`;
     },
     select(item) {
-      this.$store.commit('updateSelected', { id: this.dropdownId, item });
+      this.$store.commit('setSelected', { id: this.id, item });
       this.toggleDropdown();
     },
     toggleDropdown() {
