@@ -18,7 +18,7 @@
 import _ from 'lodash';
 import Velocity from 'velocity-animate';
 
-import MapOverlayButton from './MapOverlayButton.vue';
+import MapOverlayButton from './MapOverlayButton.component.vue';
 
 function findDefault(items) {
   let defaultItem;
@@ -91,8 +91,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../scss/variables';
-
 .map-overlay-dropdown {
   position: relative;
   .dropdown {

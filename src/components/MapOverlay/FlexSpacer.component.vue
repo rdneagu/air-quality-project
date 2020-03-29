@@ -3,8 +3,6 @@
 </template>
 
 <style lang="scss">
-@import '../scss/variables';
-
 hr.flex-spacer {
   flex: 1;
   border: none;

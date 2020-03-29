@@ -36,8 +36,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/scss/_variables';
-@import '@/scss/_mixins';
+@import '~@/scss/_mixins';
 
 @font-face {
   font-family: 'icon-aqp';

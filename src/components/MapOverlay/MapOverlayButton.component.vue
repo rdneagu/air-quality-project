@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Icon from './Icon.vue';
+import Icon from '../Icon.component.vue';
 
 export default {
   components: {
@@ -32,8 +32,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../scss/variables';
-
 .map-overlay-button {
   position: relative;
   display: flex;

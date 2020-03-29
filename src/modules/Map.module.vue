@@ -21,7 +21,7 @@ import * as am4core from '@amcharts/amcharts4/core';
 import * as am4maps from '@amcharts/amcharts4/maps';
 import am4themesAnimated from '@amcharts/amcharts4/themes/animated';
 
-import MapOverlay from './MapOverlay.vue';
+import MapOverlay from '../components/MapOverlay/MapOverlay.component.vue';
 
 am4core.useTheme(am4themesAnimated);
 
@@ -33,45 +33,40 @@ export default {
     return {
       map: {
         model: undefined,
+        // Functions that are passed to the overlay to control the map (need to be refactored)
         func: {
           viewHome: this.viewZoom.bind(null, 'home'),
           zoomReset: this.viewZoom.bind(null, 'reset'),
           zoomIn: this.viewZoom.bind(null, 'in'),
           zoomOut: this.viewZoom.bind(null, 'out'),
         },
+        // Zoom configuration
         zoom: {
           min: 1,
           max: 200,
           threshold: 0,
           animation: undefined,
         },
+        // amCharts4 map series
         series: {
           target: undefined,
           worldSeries: undefined,
           countrySeries: undefined,
         },
-        aq: {
-          list: {},
-        },
-        data: {
-          target: undefined,
-          world: [],
-          country: {},
-        },
+        // Map state
         state: {
           initiating: true,
           loading: true,
         },
-        stroke: '#01452c',
+        stroke: '#01452c', // Required to override the region polygon strokes, changes everytime we change the filter
       },
       mapOverlay: false,
     };
   },
   async mounted() {
     await this.$nextTick();
-
-    const worldSeriesResult = await axios.get('http://codegod.xyz:8090/map');
-    // const worldSeriesResult = await axios.get('/api/getWorld');
+    // const worldSeriesResult = await axios.get('http://codegod.xyz:8090/map');
+    const worldSeriesResult = await axios.get('/api/getWorld');
     const map = am4core.create(this.$refs.map, am4maps.MapChart);
     this.map.model = map;
     map.projection = new am4maps.projections.Mercator();
@@ -111,19 +106,22 @@ export default {
           return response;
         });
         const aqifeed = await Promise.all(promises);
-        this.$set(this.map.data, 'world', _.map(aqifeed, (country, id) => {
+        const data = _.map(aqifeed, (country, id) => {
           const mapping = { id };
           if (country.data.status === 'ok') {
             return {
               ...mapping,
+              code: worldSeries.data[id].id,
               aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
               dominent: country.data.data.dominentpol,
             };
           }
           return mapping;
-        }));
+        });
+        this.$store.commit('setWorldData', { data });
         this.map.state.initiating = false;
         this.map.state.loading = false;
+        this.updateAQIMinMax();
         this.showWorld();
       } catch (e) {
         console.error(e);
@@ -131,39 +129,49 @@ export default {
     });
   },
   computed: {
+    getActiveAQI() {
+      return this.$store.getters.getSelected('filter') || 'smart';
+    },
+    getAQIColorCSS() {
+      return this.$store.getters.getAQIColor(this.getActiveAQI);
+    },
     polygonStrokeCSS() {
       return { '--stroke': this.map.stroke };
     },
   },
   methods: {
-    updateAQIList() {
-      const aqiList = _.reduce(this.map.data.target, (acc, country) => {
+    updateActiveAQI() {
+      const list = _.reduce(this.$store.getters.getActiveData, (acc, country) => {
         acc = { ...acc || {}, ...country.aqi };
         return acc;
       }, {});
-      delete aqiList.smart;
-      this.$store.state.map.aqis = aqiList;
+      delete list.smart;
+      this.$store.commit('setActiveAQI', { list: _.keys(list) });
     },
-    updateHeatMap() {
-      const filter = this.$store.getters.getSelected('filter') || 'smart';
-      const aqiNumbers = _.map(this.map.data.target, (country) => ((country.aqi && filter in country.aqi) ? country.aqi[filter].v : 0));
-      const [min, max] = [_.min(aqiNumbers), _.max(aqiNumbers)];
-      console.log(`min -> ${min}`);
-      console.log(`max -> ${max}`);
-      this.map.series.target.mapPolygons.template.stroke = am4core.color(this.$store.getters.getAQIColor(filter)).lighten(-0.5);
-      this.map.stroke = (am4core.color(this.$store.getters.getAQIColor(filter)).lighten(0.5)).rgba;
-      _.forEach(this.map.data.target, (country, id) => {
+    updateAQIMinMax() {
+      _.forEach(this.$store.getters.getAQIKeys, (aqi) => {
+        const aqiNumbers = _.map(this.$store.getters.getWorldData, (country) => ((country.aqi && aqi in country.aqi) ? country.aqi[aqi].v : 0));
+        const [min, max] = [_.min(aqiNumbers), _.max(aqiNumbers)];
+        this.$store.commit('setAQIMinMax', { aqi, min, max });
+      });
+    },
+    updateAQIHeatMap() {
+      const aqi = this.getActiveAQI;
+      const aqiColor = this.$store.getters.getAQIColor(aqi);
+      this.map.series.target.mapPolygons.template.stroke = am4core.color(aqiColor).lighten(-0.5);
+      this.map.stroke = (am4core.color(aqiColor).lighten(0.5)).rgba;
+      _.forEach(this.$store.getters.getActiveData, (country, id) => {
         let tooltip = 'No data recorded for this Air Quality Index';
         this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color('rgba(0, 0, 0, 1)');
-        if (country.aqi && filter in country.aqi) {
-          this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color(this.$store.getters.getAQIHeatColor(country.aqi[filter].v, min, max));
-          tooltip = `${filter}: ${country.aqi[filter].v} μ/mg`;
+        if (country.aqi && aqi in country.aqi) {
+          this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color(this.$store.getters.getAQIHeatColor(aqi, country.aqi[aqi].v));
+          tooltip = `${aqi}: ${country.aqi[aqi].v.toFixed(1)} μ/mg`;
         }
         this.map.series.target.data[id].aqi = tooltip;
       });
     },
     /**
-     * Default configuration for series
+     * Default configuration for map series
      */
     configSeries(series) {
       series.useGeodata = true;
@@ -186,6 +194,15 @@ export default {
       polygon.stroke = am4core.color('#01452c');
       polygon.propertyFields.fill = 'color';
       polygon.cursorOverStyle = am4core.MouseCursorStyle.pointer;
+      polygon.events.on('over', (evt) => {
+        const id = _.findIndex(evt.target.series.mapPolygons.values, (p) => p.uid === evt.target.uid);
+        this.$store.commit('setMouseoverRegion', { id });
+      });
+      polygon.events.on('out', (evt) => {
+        const id = _.findIndex(evt.target.series.mapPolygons.values, (p) => p.uid === evt.target.uid);
+        if (id !== this.$store.getters.getMouseoverRegion) return;
+        this.$store.commit('setMouseoverRegion', { id: undefined });
+      });
     },
     /**
      * Shows the overlay
@@ -212,7 +229,8 @@ export default {
     showCountry() {
       this.map.series.worldSeries.hide();
       this.map.series.countrySeries.show();
-      this.updateHeatMap();
+      this.updateActiveAQI();
+      this.updateAQIHeatMap();
     },
     /**
      * Shows the world series and hides the country series
@@ -222,10 +240,10 @@ export default {
       this.cancelCountry();
       this.map.series.worldSeries.show();
       this.map.series.countrySeries.hide();
-      this.map.data.target = this.map.data.world;
       this.map.series.target = this.map.series.worldSeries;
-      this.updateAQIList();
-      this.updateHeatMap();
+      this.$store.commit('setActiveData', { data: this.$store.getters.getWorldData });
+      this.updateActiveAQI();
+      this.updateAQIHeatMap();
     },
     /**
      * Zoom in to a specific country polygon and load the regions
@@ -242,42 +260,42 @@ export default {
           this.map.zoom.threshold = target.series.chart.zoomLevel;
           // If country is not cached, request data from the server and cache it for later use
           if (!this.$store.getters.getCache(`country_${code}`)) {
-            const response = await axios.get(`http://codegod.xyz:8090/countryMap?countryCode=${code}`);
-            // const response = await axios.get(`/api/getCountry?country=${code}`);
+            // const response = await axios.get(`http://codegod.xyz:8090/countryMap?countryCode=${code}`);
+            const response = await axios.get(`/api/getCountry?country=${code}`);
             this.$store.commit('setCache', { name: `country_${code}`, data: response.data });
           }
           // Set the series geodata and show the country series
           this.map.series.countrySeries.geodata = { ...this.$store.getters.getCache(`country_${code}`).data };
           this.map.series.countrySeries.events.once('datavalidated', async () => {
-            if (!this.map.data.country[code]) {
+            if (!this.$store.getters.getCountryData(code)) {
               try {
                 const promises = _.map(this.map.series.countrySeries.mapPolygons.values, (cityPolygon) => {
                   const response = axios.get(`https://api.waqi.info/feed/geo:${cityPolygon.latitude};${cityPolygon.longitude}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
                   return response;
                 });
                 const aqifeed = await Promise.all(promises);
-                this.$set(this.map.data.country, code, _.map(aqifeed, (city, id) => {
+                const data = _.map(aqifeed, (city, id) => {
                   const mapping = { id };
                   if (city.data.status === 'ok') {
                     return {
                       ...mapping,
+                      code,
                       aqi: { ...city.data.data.iaqi, smart: { v: city.data.data.aqi } },
                       dominent: city.data.data.dominentpol,
                     };
                   }
                   return mapping;
-                }));
+                });
+                this.$store.commit('setCountryData', { country: code, data });
               } catch (e) {
                 console.error(e);
               }
             }
             this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
-            this.$set(this.map.data, 'target', this.map.data.country[code]);
+            this.$store.commit('setActiveData', { data: this.$store.getters.getCountryData(code) });
             this.$set(this.map.series, 'target', this.map.series.countrySeries);
             this.map.zoom.animation = undefined;
             this.map.state.loading = false;
-            this.updateAQIList();
-            this.updateHeatMap();
             this.showCountry();
           });
         }
@@ -346,7 +364,7 @@ export default {
   watch: {
     '$store.state.selected.filter': async function filterChanged(to, from) {
       if (to !== undefined && to !== from) {
-        this.updateHeatMap();
+        this.updateAQIHeatMap();
       }
     },
   },
@@ -354,7 +372,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../scss/variables';
+@import '~@/scss/_mixins';
 
 .map-wrapper {
   position: relative;

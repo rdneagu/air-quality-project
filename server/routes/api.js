@@ -1,5 +1,4 @@
 const express = require('express');
-const knex = require('../lib/knex.js');
 
 const worldMap = require('../geodata/worldMapCountries.json');
 const countryStats = require('../geodata/pollution.json');
@@ -11,8 +10,8 @@ router.get('/getWorld', async (req, res) => {
 });
 
 router.get('/getCountry', async (req, res) => {
-  const { country } = req.body;
-  const json = require(`../geodata/countries/${country}.json`);
+  const { country } = req.query;
+  const json = require(`../geodata/countries/${country}.json`); // eslint-disable-line
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.send(json);
 });

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import Header from './components/Header.vue';
+import Header from './modules/Header.module.vue';
 
 export default {
   components: {
@@ -17,7 +17,6 @@ export default {
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Titillium+Web:400,500,600,700&display=swap');
-@import './scss/_variables';
 @import './scss/_normalize';
 @import './scss/_fx';
 
@@ -36,5 +35,8 @@ html, body, #app {
   text-align: center;
   color: $color-text;
   text-shadow: 1px 1px 1px black;
+  .page {
+    overflow: hidden;
+  }
 }
 </style>

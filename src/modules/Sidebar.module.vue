@@ -8,11 +8,19 @@
 
 <script>
 export default {
+  computed: {
+    getActiveAQI() {
+      return this.$store.getters.getSelected('filter') || 'smart';
+    },
+    getAQIColor() {
+      return this.$store.getters.getAQIColor(this.getActiveAQI);
+    },
+  },
 };
 </script>
 
 <style lang="scss">
-@import '@/scss/_variables';
+@import '~@/scss/_mixins';
 
 .sidebar-wrapper {
   grid-area: sidebar;

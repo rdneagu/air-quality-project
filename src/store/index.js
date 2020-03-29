@@ -1,39 +1,43 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import _ from 'lodash';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    colors: {
-      aqi: {
-        smart: '#008000',
-        h: '#ff0000',
-        p: '#800000',
-        w: '#ffff00',
-        t: '#808000',
-        pm25: '#00ff00',
-        pm10: '#00ffff',
-        dew: '#008080',
-        wg: '#0000ff',
-        so2: '#000080',
-        no2: '#002366',
-        o3: '#ff00ff',
-        co: '#800080',
-        r: '#784212',
-        wd: '#ff5733',
-        uvi: '#ff6fee',
-        mepaqi: '#c0392b',
-      },
-    },
     selected: {},
     sidebar: {
       visible: false,
     },
     map: {
-      aqis: {},
-      world: {},
-      country: {},
+      aqi: {
+        smart: { color: '#008000' },
+        h: { color: '#ff0000' },
+        p: { color: '#800000' },
+        w: { color: '#ffff00' },
+        t: { color: '#808000' },
+        pm25: { color: '#00ff00' },
+        pm10: { color: '#00ffff' },
+        dew: { color: '#008080' },
+        wg: { color: '#0000ff' },
+        so2: { color: '#000080' },
+        no2: { color: '#002366' },
+        o3: { color: '#ff00ff' },
+        co: { color: '#800080' },
+        r: { color: '#784212' },
+        wd: { color: '#ff5733' },
+        uvi: { color: '#ff6fee' },
+        mepaqi: { color: '#c0392b' },
+        active: [],
+      },
+      // API data
+      data: {
+        active: undefined,
+        world: [],
+        country: {},
+      },
+      mouseover: undefined,
     },
     cache: {},
   },
@@ -44,11 +48,14 @@ export default new Vuex.Store({
       if (state.cache[name] && state.cache[name].ts > Date.now()) return state.cache[name];
       return false;
     },
-    getAQIColor: (state) => (aqi) => state.colors.aqi[aqi],
-    getAQIHeatColor: (state) => (val, min, max) => {
-      const filter = state.selected.filter || 'smart';
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(state.colors.aqi[filter]);
-
+    //
+    getMouseoverRegion: (state) => state.map.mouseover,
+    // AQI related getters
+    getAQIKeys: (state) => _.keys(state.map.aqi),
+    getAQIColor: (state) => (aqi) => state.map.aqi[aqi].color,
+    getAQIHeatColor: (state, getters) => (aqi, val) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(state.map.aqi[aqi].color);
+      const { min, max } = getters.getAQIMinMax(aqi);
       const intensity = (val - min) / (max - min);
       const lower = 1 - intensity;
       const upper = intensity;
@@ -59,13 +66,19 @@ export default new Vuex.Store({
       };
       return `rgb(${color.r}, ${color.g}, ${color.b})`;
     },
+    getAQIMinMax: (state) => (aqi) => state.map.aqi[aqi],
+    getActiveAQI: (state) => state.map.aqi.list,
+    // Map data related getters
+    getActiveData: (state) => state.map.data.active,
+    getWorldData: (state) => state.map.data.world,
+    getCountryData: (state) => (country) => state.map.data.country[country],
   },
   mutations: {
     setSelected(state, { id, item }) {
       Vue.set(state.selected, id, item);
     },
     toggleSidebar(state) {
-      state.sidebar.visible = !state.sidebar.visible;
+      Vue.set(state.sidebar, 'visible', !state.sidebar.visible);
     },
     setCache(state, { name, data }) {
       const cache = {
@@ -73,6 +86,27 @@ export default new Vuex.Store({
         ts: Date.now() + 3600000,
       };
       Vue.set(state.cache, name, cache);
+    },
+    //
+    setMouseoverRegion(state, { id }) {
+      Vue.set(state.map, 'mouseover', id);
+    },
+    // AQI related mutations
+    setAQIMinMax(state, { aqi, min, max }) {
+      Vue.set(state.map.aqi, aqi, { ...state.map.aqi[aqi], min, max });
+    },
+    setActiveAQI(state, { list }) {
+      Vue.set(state.map.aqi, 'list', list);
+    },
+    // Map data related mutations
+    setActiveData(state, { data }) {
+      Vue.set(state.map.data, 'active', data);
+    },
+    setWorldData(state, { data }) {
+      Vue.set(state.map.data, 'world', data);
+    },
+    setCountryData(state, { country, data }) {
+      Vue.set(state.map.data.country, country, data);
     },
   },
   actions: {

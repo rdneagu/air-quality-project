@@ -20,9 +20,9 @@
 <script>
 import _ from 'lodash';
 
-import MapOverlayButton from './MapOverlayButton.vue';
-import MapOverlayDropdown from './MapOverlayDropdown.vue';
-import FlexSpacer from './FlexSpacer.vue';
+import MapOverlayButton from './MapOverlayButton.component.vue';
+import MapOverlayDropdown from './MapOverlayDropdown.component.vue';
+import FlexSpacer from './FlexSpacer.component.vue';
 
 export default {
   components: {
@@ -34,7 +34,7 @@ export default {
   computed: {
     filterDropdown() {
       const filters = { smart: { text: 'SMART', icon: 'filter-card', filterColor: this.$store.getters.getAQIColor('smart'), default: true } };
-      _.forEach(this.$store.state.map.aqis, (aqi, id) => {
+      _.forEach(this.$store.getters.getActiveAQI, (id) => {
         filters[id] = {
           text: id.toUpperCase(),
           icon: 'filter-card',
@@ -53,8 +53,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../scss/variables';
-
 .map-overlay {
   position: absolute;
   left: 0;
