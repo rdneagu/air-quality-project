@@ -1,7 +1,7 @@
 <template>
-  <section v-if="$store.getters.getActiveData" class="map-legend-wrapper">
+  <section v-if="!$store.getters.getMapState.loading" class="map-legend-wrapper">
     <div class="map-legend" ref="legend" :style="{ background: createGradient, borderColor: getAQIColor }">
-      <span v-if="getMouseoverAQI" class="legend-thumb" :style="{ left: getAQIPosition, background: getAQIColor }"></span>
+      <span v-show="getMouseoverAQI" class="legend-thumb" :style="{ left: getAQIPosition, background: getAQIColor }"></span>
     </div>
     <span class="range-value aqi-min" :style="{ color: getAQIColor }">{{ getAQIMinMax.min }}</span>
     <span class="range-value aqi-max">{{ getAQIMinMax.max }}</span>

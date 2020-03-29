@@ -27,7 +27,7 @@ export default {
 #app .home {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: 700px 40px 1fr;
+  grid-template-rows: 700px 45px 1fr;
   grid-row-gap: 10px;
   grid-template-areas: "map sidebar"
                        "legend legend"
@@ -37,7 +37,7 @@ export default {
     grid-area: map;
   }
   .map-legend-wrapper {
-    margin-top: 10px;
+    margin-top: 15px;
     grid-area: legend;
   }
   .graphs-wrapper {

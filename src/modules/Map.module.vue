@@ -1,11 +1,11 @@
 <template>
   <div class="map-wrapper" @mouseenter="showOverlay" @mouseleave="hideOverlay">
     <transition name="fade-io-quick" appear>
-      <div v-show="!map.state.initiating" class="map-model" ref="map" :style="polygonStrokeCSS"></div>
+      <div v-show="!$store.getters.getMapState.initiating" class="map-model" ref="map" :style="polygonStrokeCSS"></div>
     </transition>
-    <MapOverlay v-if="mapOverlay && !map.state.initiating" :func="map.func"></MapOverlay>
+    <MapOverlay v-if="mapOverlay && !$store.getters.getMapState.initiating" :func="map.func"></MapOverlay>
     <transition name="fade-io-quick" appear>
-      <div v-if="map.state.loading" class="map-loading">
+      <div v-if="$store.getters.getMapState.loading" class="map-loading">
         <div class="bar"></div>
         <div class="bar"></div>
         <div class="bar"></div>
@@ -52,11 +52,6 @@ export default {
           target: undefined,
           worldSeries: undefined,
           countrySeries: undefined,
-        },
-        // Map state
-        state: {
-          initiating: true,
-          loading: true,
         },
         stroke: '#01452c', // Required to override the region polygon strokes, changes everytime we change the filter
       },
@@ -119,8 +114,7 @@ export default {
           return mapping;
         });
         this.$store.commit('setWorldData', { data });
-        this.map.state.initiating = false;
-        this.map.state.loading = false;
+        this.$store.commit('setMapState', { initiating: false, loading: false });
         this.updateAQIMinMax();
         this.showWorld();
       } catch (e) {
@@ -145,6 +139,9 @@ export default {
         acc = { ...acc || {}, ...country.aqi };
         return acc;
       }, {});
+      if (!(this.$store.getters.getSelected('filter') in list)) {
+        this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
+      }
       delete list.smart;
       this.$store.commit('setActiveAQI', { list: _.keys(list) });
     },
@@ -250,7 +247,7 @@ export default {
      */
     enterCountry(target) {
       // Zoom in the clicked region and display the inner regions when the animation finishes
-      this.map.state.loading = true;
+      this.$store.commit('setMapState', { loading: true });
       this.map.zoom.animation = target.series.chart.zoomToMapObject(target);
       this.map.zoom.animation.events.once('animationended', async () => {
         const code = target.dataItem.dataContext.id;
@@ -291,11 +288,10 @@ export default {
                 console.error(e);
               }
             }
-            this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
             this.$store.commit('setActiveData', { data: this.$store.getters.getCountryData(code) });
             this.$set(this.map.series, 'target', this.map.series.countrySeries);
             this.map.zoom.animation = undefined;
-            this.map.state.loading = false;
+            this.$store.commit('setMapState', { loading: false });
             this.showCountry();
           });
         }
@@ -306,7 +302,7 @@ export default {
      */
     cancelCountry() {
       if (this.map.zoom.animation) {
-        this.map.state.loading = false;
+        this.$store.commit('setMapState', { loading: false });
         this.map.zoom.animation.kill();
         this.map.zoom.animation = undefined;
       }

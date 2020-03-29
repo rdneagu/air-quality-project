@@ -38,6 +38,11 @@ export default new Vuex.Store({
         country: {},
       },
       mouseover: undefined,
+      // Map state
+      state: {
+        initiating: true,
+        loading: true,
+      },
     },
     cache: {},
   },
@@ -72,6 +77,8 @@ export default new Vuex.Store({
     getActiveData: (state) => state.map.data.active,
     getWorldData: (state) => state.map.data.world,
     getCountryData: (state) => (country) => state.map.data.country[country],
+    //
+    getMapState: (state) => state.map.state,
   },
   mutations: {
     setSelected(state, { id, item }) {
@@ -107,6 +114,10 @@ export default new Vuex.Store({
     },
     setCountryData(state, { country, data }) {
       Vue.set(state.map.data.country, country, data);
+    },
+    //
+    setMapState(state, payload) {
+      Vue.set(state.map, 'state', { ...state.map.state, ...payload });
     },
   },
   actions: {
