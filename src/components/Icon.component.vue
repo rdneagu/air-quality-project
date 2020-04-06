@@ -69,6 +69,9 @@ export default {
   // }
 }
 
+.icon-warning-aqp:before {
+  content: "\e91c";
+}
 .icon-circle-left-aqp:before {
   content: "\e918";
 }
