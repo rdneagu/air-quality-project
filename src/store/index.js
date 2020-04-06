@@ -45,6 +45,7 @@ export default new Vuex.Store({
       },
     },
     cache: {},
+    tooltip: null,
   },
   getters: {
     getSidebarVisibility: (state) => state.sidebar.visible,
@@ -79,6 +80,8 @@ export default new Vuex.Store({
     getCountryData: (state) => (country) => state.map.data.country[country],
     //
     getMapState: (state) => state.map.state,
+    //
+    getTooltip: (state) => state.tooltip,
   },
   mutations: {
     setSelected(state, { id, item }) {
@@ -118,6 +121,13 @@ export default new Vuex.Store({
     //
     setMapState(state, payload) {
       Vue.set(state.map, 'state', { ...state.map.state, ...payload });
+    },
+    //
+    showTooltip(state, tooltip) {
+      state.tooltip = tooltip;
+    },
+    hideTooltip(state) {
+      state.tooltip = null;
     },
   },
   actions: {
