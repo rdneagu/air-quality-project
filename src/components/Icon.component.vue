@@ -3,7 +3,7 @@
     <img v-if="img" :src="getImage" :class="[ getIcon ]" />
     <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
   </router-link>
-  <div v-else-if="name" class="icon-wrapper" :class="[ isDisabled ]" @click.stop="OnIconClick">
+  <div v-else-if="name" class="icon-wrapper" :class="[ isDisabled ]" @click="OnIconClick">
     <img v-if="img" :src="getImage" :class="[ getIcon ]" />
     <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
   </div>
@@ -27,8 +27,10 @@ export default {
     },
   },
   methods: {
-    OnIconClick() {
+    OnIconClick(evt) {
       if (this.disabled || typeof (this.click) !== 'function') return false;
+
+      evt.stopPropagation();
       return this.click();
     },
   },
@@ -41,15 +43,17 @@ export default {
 @font-face {
   font-family: 'icon-aqp';
   src:
-    url('../assets/fonts/icon-aqp.ttf?hnmce8') format('truetype'),
-    url('../assets/fonts/icon-aqp.woff?hnmce8') format('woff'),
-    url('../assets/fonts/icon-aqp.svg?hnmce8#icon-aqp') format('svg');
+    url('../assets/fonts/icon-aqp.ttf?ynh86t') format('truetype'),
+    url('../assets/fonts/icon-aqp.woff?ynh86t') format('woff'),
+    url('../assets/fonts/icon-aqp.svg?ynh86t#icon-aqp') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
 .icon {
   /* use !important to prevent issues with browser extensions that change fonts */
+  display: flex;
+  align-items: center;
   font-family: 'icon-aqp' !important;
   font-style: normal;
   font-weight: normal;
@@ -63,6 +67,56 @@ export default {
   //   color: lighten($color-text, 20%);
   //   cursor: pointer;
   // }
+}
+
+.icon-circle-left-aqp:before {
+  content: "\e918";
+}
+.icon-circle-down-aqp:before {
+  content: "\e919";
+}
+.icon-circle-right-aqp:before {
+  content: "\e91a";
+}
+.icon-circle-up-aqp:before {
+  content: "\e91b";
+}
+.icon-mail-aqp:before {
+  content: "\e917";
+}
+.icon-lock-aqp:before {
+  content: "\e916";
+}
+.icon-login-aqp:before {
+  content: "\e913";
+}
+.icon-person_add-aqp:before {
+  content: "\e914";
+}
+.icon-person-aqp:before {
+  content: "\e915";
+}
+.icon-arrow_dr-aqp, .icon-arrow_dl-aqp, .icon-arrow_du-aqp, .icon-arrow_dd-aqp { font-size: 1.8em; }
+.icon-arrow_dr-aqp:before {
+  content: "\e90f";
+}
+.icon-arrow_dl-aqp:before {
+  content: "\e910";
+}
+.icon-arrow_du-aqp:before {
+  content: "\e911";
+}
+.icon-arrow_dd-aqp:before {
+  content: "\e912";
+}
+.icon-leaf-2-aqp:before {
+  content: "\e90e";
+}
+.icon-leaf-aqp:before {
+  content: "\e90d";
+}
+.icon-cloud-aqp:before {
+  content: "\e90c";
 }
 .icon-filter-card-aqp:before {
   content: "\e90b";
