@@ -122,14 +122,16 @@ export default {
       font-size: 64px;
     }
     .login-form {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 40px;
       margin: 40px 0;
       border-radius: 5px;
-      box-shadow: 0 0 8px rgba($map-fill-color, .8);
-      background: linear-gradient(to bottom, darken($map-stroke-color, 8%), darken($map-stroke-color, 7%), darken($map-stroke-color, 8%));
+      box-shadow: 0 0 4px $map-fill-color;
+      border: 1px solid #000;
+      background: linear-gradient(to bottom, darken($map-stroke-color, 10%), darken($map-stroke-color, 9%), darken($map-stroke-color, 10%));
       .title {
         font-size: 24px;
         font-weight: 700;
@@ -145,7 +147,7 @@ export default {
           grid-template-rows: auto auto;
           grid-template-areas: "label label"
                               "field error";
-          font-size: 20px;
+          font-size: 16px;
           margin: 5px 0;
           label {
             grid-area: label;
