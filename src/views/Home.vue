@@ -1,8 +1,9 @@
 <template>
   <div class="home">
-    <Map></Map>
-    <Sidebar></Sidebar>
-    <MapLegend></MapLegend>
+    <slot name="header" />
+    <Map />
+    <Sidebar />
+    <MapLegend />
     <div class="graphs-wrapper">
 
     </div>
@@ -27,9 +28,10 @@ export default {
 #app .home {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: 700px 45px 1fr;
-  grid-row-gap: 10px;
-  grid-template-areas: "map sidebar"
+  grid-template-rows: 80px 700px 45px 1fr;
+  // grid-row-gap: 10px;
+  grid-template-areas: "header header"
+                       "map sidebar"
                        "legend legend"
                        "graphs graphs";
 

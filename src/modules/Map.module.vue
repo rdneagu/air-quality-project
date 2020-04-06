@@ -59,6 +59,7 @@ export default {
     };
   },
   async mounted() {
+    this.$store.commit('setMapState', { initiating: true, loading: true });
     await this.$nextTick();
     // const worldSeriesResult = await axios.get('http://codegod.xyz:8090/map');
     const worldSeriesResult = await axios.get('/api/getWorld');
@@ -375,7 +376,7 @@ export default {
   display: flex;
   border-top: 1px solid $map-stroke-color;
   border-bottom: 1px solid $map-stroke-color;
-  background-color: $map-bg-color;
+  background-color: #000;
   overflow: hidden;
   .map-model {
     flex: 1;
