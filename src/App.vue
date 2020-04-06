@@ -5,16 +5,16 @@
         <Header slot="header" />
       </router-view>
     </transition>
+    <Tooltip />
   </div>
 </template>
 
 <script>
 import Header from './modules/Header.module.vue';
+import Tooltip from './modules/Tooltip.module.vue';
 
 export default {
-  components: {
-    Header,
-  },
+  components: { Header, Tooltip },
   computed: {
     isRoute() {
       return this.$route.name;
@@ -60,6 +60,7 @@ html, body, #app {
   color: $color-text;
   text-shadow: 1px 1px 1px black;
   .page {
+    position: relative;
     grid-area: page;
     overflow: hidden;
     transition: opacity .4s ease;
