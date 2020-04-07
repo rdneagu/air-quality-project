@@ -30,6 +30,7 @@ export default new Vuex.Store({
         uvi: { color: '#ff6fee' },
         mepaqi: { color: '#c0392b' },
         active: [],
+        dominent: 'pm25',
       },
       // API data
       data: {
@@ -73,7 +74,9 @@ export default new Vuex.Store({
       return `rgb(${color.r}, ${color.g}, ${color.b})`;
     },
     getAQIMinMax: (state) => (aqi) => state.map.aqi[aqi],
-    getActiveAQI: (state) => state.map.aqi.list,
+    getCurrentAQI: (state) => state.selected.filter || 'smart',
+    getActiveAQI: (state) => state.map.aqi.active,
+    getDominentAQI: (state) => state.map.aqi.dominent,
     // Map data related getters
     getActiveData: (state) => state.map.data.active,
     getWorldData: (state) => state.map.data.world,
@@ -106,7 +109,10 @@ export default new Vuex.Store({
       Vue.set(state.map.aqi, aqi, { ...state.map.aqi[aqi], min, max });
     },
     setActiveAQI(state, { list }) {
-      Vue.set(state.map.aqi, 'list', list);
+      Vue.set(state.map.aqi, 'active', list);
+    },
+    setDominentAQI(state, { aqi }) {
+      Vue.set(state.map.aqi, 'dominent', aqi);
     },
     // Map data related mutations
     setActiveData(state, { data }) {

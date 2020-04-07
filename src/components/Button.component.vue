@@ -5,7 +5,7 @@
       <span class="text">{{ getButtonText }}</span>
     </router-link>
     <div v-else class="button" :class="[ getStyle, isDisabled, isActive ]" @click.capture="OnButtonClick">
-      <Icon :name="icon"></Icon>
+      <Icon :name="isPending"></Icon>
       <span class="text">{{ getButtonText }}</span>
     </div>
     <Dropdown v-if="dropdown && dropdown.items" :dropdown="dropdown"></Dropdown>
@@ -18,7 +18,7 @@ import Dropdown from './Dropdown.component.vue';
 
 export default {
   components: { Icon, Dropdown },
-  props: ['name', 'href', 'type', 'icon', 'text', 'clickity', 'disabled', 'dropdown'],
+  props: ['name', 'href', 'type', 'icon', 'text', 'click', 'disabled', 'dropdown', 'pending'],
   computed: {
     getName() {
       return `btn-${this.name}`;
@@ -39,6 +39,9 @@ export default {
     isDisabled() {
       return this.disabled ? 'disabled' : null;
     },
+    isPending() {
+      return (this.pending ? 'spinner' : this.icon);
+    },
   },
   methods: {
     OnButtonClick() {
@@ -47,9 +50,9 @@ export default {
       // If the button has a dropdown menu, force the click functionality to show the dropdown
       if (this.dropdown) return this.$set(this.dropdown, 'visible', !this.dropdown.visible);
       // If the button is not a valid function don't do anything
-      if (typeof (this.clickity) !== 'function') return false;
+      if (typeof (this.click) !== 'function') return false;
       // Call the bound function
-      return this.clickity();
+      return this.click();
     },
   },
 };

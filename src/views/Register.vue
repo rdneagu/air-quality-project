@@ -16,7 +16,7 @@
           </div>
         </section>
         <section class="form-control">
-          <Button v-for="(button, id) in form.control" :key="id" :type="button.type" :icon="button.icon" :click="button.click">{{ button.text }}</Button>
+          <Button v-for="(button, id) in form.control" :key="id" v-bind="button">{{ button.text }}</Button>
         </section>
       </form>
     </div>
@@ -24,6 +24,9 @@
 </template>
 
 <script>
+import _ from 'lodash';
+import axios from 'axios';
+
 import Logo from '../components/Logo.component.vue';
 import Icon from '../components/Icon.component.vue';
 import Button from '../components/Button.component.vue';
@@ -34,19 +37,21 @@ export default {
     return {
       form: {
         title: 'Register',
-        action: '/users/register',
+        action: 'http://3.16.90.231:8090/user',
         input: {
-          username: { icon: 'person', type: 'text', placeholder: 'USERNAME' },
+          userName: { icon: 'person', type: 'text', placeholder: 'USERNAME' },
           password: { icon: 'lock', type: 'password', placeholder: 'PASSWORD' },
-          confirmPassword: { icon: 'lock', type: 'password', placeholder: 'CONFIRM PASSWORD' },
           email: { icon: 'mail', type: 'text', placeholder: 'EMAIL' },
-          confirmEmail: { icon: 'mail', type: 'text', placeholder: 'CONFIRM EMAIL' },
+          number: { icon: 'phone', type: 'text', placeholder: 'PHONE NUMBER' },
         },
-        control: [
-          { text: 'Register', icon: 'circle-right', type: 'dialog', click: this.submit.bind(null) },
-        ],
+        control: {
+          submit: { text: 'Register', icon: 'circle-right', type: 'dialog', click: this.submit.bind(null) },
+        },
       },
     };
+  },
+  activated() {
+    this.clear();
   },
   methods: {
     /**
@@ -68,27 +73,52 @@ export default {
       return (field.error) ? 'failed' : null;
     },
     /**
+     * Clears the active form input fields and resets the recovery step
+     */
+    clear() {
+      _.forEach(this.form.input, (field, key) => {
+        this.$delete(this.form.input[key], 'model');
+        this.$delete(this.form.input[key], 'error');
+      });
+    },
+    /**
+     * Cleans the active form of errors
+     */
+    clean() {
+      _.forEach(this.form.input, (field, key) => {
+        this.$delete(this.form.input[key], 'error');
+      });
+    },
+    /**
+     * Prepares the data of the input fields to be sent to the server
+     */
+    prepareInputData() {
+      // Reduce the input fields to { 'fieldName': 'fieldValue' } to prepare it
+      const data = _.reduce(this.form.input, (acc, val, key) => {
+        acc[key] = val.model;
+        return acc;
+      }, {});
+      return data;
+    },
+    /**
      * Submits the active form data to the server
      */
     async submit() {
-      // this.clean();
-      // const data = this.prepareInputData();
-      // // Submit the form data
-      // const response = await axios.post(this.getForm.action, data);
-      // // Format the input errors if there are any
-      // if (response.data.error) {
-      //   _.forEach(response.data.error, (error, field) => {
-      //     this.$set(this.getForm.input[field], 'error', error[0]);
-      //   });
-      // } else {
-      //   const { step } = this.forms.recovery;
-      //   switch (this.form) {
-      //     case 'register': this.getForm.success(data.username); break;
-      //     case 'login': this.getForm.success(response.data.result); break;
-      //     case 'recovery': this.getForm.success(step); break;
-      //     default: break;
-      //   }
-      // }
+      if (this.form.control.submit.pending) return;
+
+      this.clean();
+      const data = this.prepareInputData();
+      // Submit the form data
+      try {
+        this.$set(this.form.control.submit, 'pending', true);
+        await axios.post(this.form.action, data);
+        this.$router.push('/');
+      } catch (e) {
+        _.forEach(this.form.input, (input, key) => {
+          this.$set(this.form.input[key], 'error', 'One of the fields is invalid!');
+        });
+      }
+      this.$delete(this.form.control.submit, 'pending');
     },
   },
 };
@@ -126,6 +156,7 @@ export default {
       font-size: 64px;
     }
     .register-form {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -135,6 +166,19 @@ export default {
       box-shadow: 0 0 4px $map-fill-color;
       border: 1px solid #000;
       background: linear-gradient(to bottom, darken($map-stroke-color, 10%), darken($map-stroke-color, 9%), darken($map-stroke-color, 10%));
+      &:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: url('../assets/images/panel-bg.jpg') no-repeat center center / 350%;
+        opacity: .2;
+      }
+      > * {
+        position: relative;
+      }
       .title {
         font-size: 24px;
         font-weight: 700;
@@ -160,7 +204,12 @@ export default {
             border-bottom: 2px solid $map-fill-color;
             font-size: 16px;
             font-weight: 700;
-            .icon { margin-right: 5px; }
+            .icon {
+              display: flex;
+              justify-content: center;
+              width: 24px;
+              margin-right: 5px;
+            }
           }
           input {
             grid-area: field;

@@ -16,6 +16,7 @@
 
 <script>
 import _ from 'lodash';
+// import * as _fp from 'lodash/fp';
 import axios from 'axios';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4maps from '@amcharts/amcharts4/maps';
@@ -107,7 +108,8 @@ export default {
           if (country.data.status === 'ok') {
             return {
               ...mapping,
-              code: worldSeries.data[id].id,
+              name: this.map.series.worldSeries.data[id].name,
+              code: this.map.series.worldSeries.data[id].id,
               aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
               dominent: country.data.data.dominentpol,
             };
@@ -123,12 +125,12 @@ export default {
       }
     });
   },
+  beforeDestroy() {
+    if (this.map.model) { this.map.model.dispose(); }
+  },
   computed: {
-    getActiveAQI() {
-      return this.$store.getters.getSelected('filter') || 'smart';
-    },
     getAQIColorCSS() {
-      return this.$store.getters.getAQIColor(this.getActiveAQI);
+      return this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI);
     },
     polygonStrokeCSS() {
       return { '--stroke': this.map.stroke };
@@ -136,7 +138,9 @@ export default {
   },
   methods: {
     updateActiveAQI() {
+      const dominentCount = {};
       const list = _.reduce(this.$store.getters.getActiveData, (acc, country) => {
+        dominentCount[country.dominent] = (dominentCount[country.dominent] || 0) + 1;
         acc = { ...acc || {}, ...country.aqi };
         return acc;
       }, {});
@@ -145,6 +149,11 @@ export default {
       }
       delete list.smart;
       this.$store.commit('setActiveAQI', { list: _.keys(list) });
+      const dominentAQI = _(dominentCount)
+        .map((count, aqi) => ({ aqi, count }))
+        .sortBy('count')
+        .last();
+      this.$store.commit('setDominentAQI', { aqi: dominentAQI.aqi });
     },
     updateAQIMinMax() {
       _.forEach(this.$store.getters.getAQIKeys, (aqi) => {
@@ -154,14 +163,14 @@ export default {
       });
     },
     updateAQIHeatMap() {
-      const aqi = this.getActiveAQI;
+      const aqi = this.$store.getters.getCurrentAQI;
       const aqiColor = this.$store.getters.getAQIColor(aqi);
       this.map.series.target.mapPolygons.template.stroke = am4core.color(aqiColor).lighten(-0.5);
       this.map.stroke = (am4core.color(aqiColor).lighten(0.5)).rgba;
       _.forEach(this.$store.getters.getActiveData, (country, id) => {
         let tooltip = 'No data recorded for this Air Quality Index';
         this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color('rgba(0, 0, 0, 1)');
-        if (country.aqi && aqi in country.aqi) {
+        if (country.aqi && (country.aqi[aqi] && !_.isNaN(country.aqi[aqi].aqi))) {
           this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color(this.$store.getters.getAQIHeatColor(aqi, country.aqi[aqi].v));
           tooltip = `${aqi}: ${country.aqi[aqi].v.toFixed(1)} μ/mg`;
         }
@@ -273,10 +282,12 @@ export default {
                 });
                 const aqifeed = await Promise.all(promises);
                 const data = _.map(aqifeed, (city, id) => {
+                  console.log(this.map.series.countrySeries.data[id].name);
                   const mapping = { id };
                   if (city.data.status === 'ok') {
                     return {
                       ...mapping,
+                      name: this.map.series.countrySeries.data[id].name,
                       code,
                       aqi: { ...city.data.data.iaqi, smart: { v: city.data.data.aqi } },
                       dominent: city.data.data.dominentpol,

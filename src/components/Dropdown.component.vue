@@ -2,7 +2,7 @@
   <transition @enter="dropdownEnter" @leave="dropdownLeave" @afterEnter="dropdownAfterEnter" appear>
     <div v-show="dropdown.visible" class="dropdown-vue" :class="[ dropdown.style ]">
       <div :id="getId" class="dropdown">
-        <Button v-for="(item, id) in dropdown.items" :key="id" v-bind="item" :name="getItemName(id)" :clickity="select.bind(null, id)">{{ item.text }}</Button>
+        <Button v-for="(item, id) in dropdown.items" :key="id" v-bind="item" :name="getItemName(id)" :click="select.bind(null, id)">{{ item.text }}</Button>
       </div>
     </div>
   </transition>

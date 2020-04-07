@@ -69,6 +69,19 @@ export default {
   // }
 }
 
+.icon-spinner-aqp:before, .icon-spinner-2-aqp:before {
+  animation: Spin 1s linear infinite;
+  text-shadow: 0 0 2px #000;
+}
+.icon-spinner-2-aqp:before {
+  content: "\e91e";
+}
+.icon-spinner-aqp:before {
+  content: "\e91f";
+}
+.icon-phone-aqp:before {
+  content: "\e91d";
+}
 .icon-warning-aqp:before {
   content: "\e91c";
 }
@@ -156,5 +169,10 @@ export default {
 }
 .icon-filter-aqp:before {
   content: "\e900";
+}
+
+@keyframes Spin {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
 }
 </style>

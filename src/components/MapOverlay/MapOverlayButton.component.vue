@@ -1,5 +1,5 @@
 <template>
-  <button class="map-overlay-button" :id="name" :class="[ special, isDisabled ]" @click.capture="click">
+  <button class="map-overlay-button" :id="name" :class="[ special, isDisabled ]" @click.capture="OnButtonClick">
     <Icon :name="icon"></Icon>
     <span class="label" :class="[ labelType || 'small' ]"><slot name="default"></slot></span>
     <slot name="filter"></slot>
@@ -13,7 +13,7 @@ export default {
   components: {
     Icon,
   },
-  props: ['name', 'text', 'special', 'icon', 'labelType', 'disabled', 'clickity', 'filterColor', 'default'],
+  props: ['name', 'text', 'special', 'icon', 'labelType', 'disabled', 'click', 'filterColor', 'default'],
   computed: {
     getId() {
       return `button-${this.name}`;
@@ -23,9 +23,9 @@ export default {
     },
   },
   methods: {
-    click() {
-      if (this.disabled || typeof (this.clickity) !== 'function') { return false; }
-      return this.clickity();
+    OnButtonClick() {
+      if (this.disabled || typeof (this.click) !== 'function') { return false; }
+      return this.click();
     },
   },
 };

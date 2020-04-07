@@ -5,13 +5,13 @@
         <MapOverlayDropdown id="filter" icon="filter" :items="filterDropdown">SMART</MapOverlayDropdown>
       </section>
       <section class="panel right">
-        <MapOverlayButton icon="home" :clickity="func.viewHome">HOME</MapOverlayButton>
+        <MapOverlayButton icon="home" :click="func.viewHome">HOME</MapOverlayButton>
         <FlexSpacer></FlexSpacer>
-        <MapOverlayButton icon="zoom-in" :clickity="func.zoomIn"></MapOverlayButton>
-        <MapOverlayButton :icon="$store.getters.getSidebarVisibility ? 'right' : 'left'" :clickity="toggleSidebar.bind()"></MapOverlayButton>
-        <MapOverlayButton icon="zoom-out" :clickity="func.zoomOut"></MapOverlayButton>
+        <MapOverlayButton icon="zoom-in" :click="func.zoomIn"></MapOverlayButton>
+        <MapOverlayButton :icon="$store.getters.getSidebarVisibility ? 'right' : 'left'" :click="toggleSidebar.bind()"></MapOverlayButton>
+        <MapOverlayButton icon="zoom-out" :click="func.zoomOut"></MapOverlayButton>
         <FlexSpacer></FlexSpacer>
-        <MapOverlayButton icon="refresh" :clickity="func.zoomReset">RESET</MapOverlayButton>
+        <MapOverlayButton icon="refresh" :click="func.zoomReset">RESET</MapOverlayButton>
       </section>
     </div>
   </transition>

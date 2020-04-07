@@ -1,9 +1,11 @@
 <template>
   <div id="app" v-if="isRoute">
     <transition name="fade-in" mode="out-in" appear>
-      <router-view class="page">
-        <Header slot="header" />
-      </router-view>
+      <keep-alive>
+        <router-view class="page">
+          <Header v-if="!isAuthScreen" slot="header" />
+        </router-view>
+      </keep-alive>
     </transition>
     <Tooltip />
   </div>
@@ -18,6 +20,15 @@ export default {
   computed: {
     isRoute() {
       return this.$route.name;
+    },
+    isAuthScreen() {
+      switch (this.$route.name) {
+        case 'login':
+        case 'register':
+          return true;
+        default:
+          return false;
+      }
     },
   },
   watch: {

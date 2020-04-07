@@ -1,9 +1,9 @@
 <template>
   <div v-if="items" class="map-overlay-dropdown" :id="getId" :class="[ disabled ]">
-    <MapOverlayButton :icon="icon" :disabled="disabled" :clickity="toggleDropdown">{{ items[getSelected].text }}</MapOverlayButton>
+    <MapOverlayButton :icon="icon" :disabled="disabled" :click="toggleDropdown">{{ items[getSelected].text }}</MapOverlayButton>
     <transition @enter="dropdownEnter" @leave="dropdownLeave" appear>
       <div v-if="isVisible" class="dropdown">
-        <MapOverlayButton v-for="(item, id) in items" :key="id" v-bind="item" :clickity="select.bind(null, id)">
+        <MapOverlayButton v-for="(item, id) in items" :key="id" v-bind="item" :click="select.bind(null, id)">
           {{ item.text }}
           <template #filter>
             <div class="filter-color" :style="{ backgroundColor: item.filterColor }"></div>

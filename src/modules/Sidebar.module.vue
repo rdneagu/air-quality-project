@@ -9,11 +9,8 @@
 <script>
 export default {
   computed: {
-    getActiveAQI() {
-      return this.$store.getters.getSelected('filter') || 'smart';
-    },
     getAQIColor() {
-      return this.$store.getters.getAQIColor(this.getActiveAQI);
+      return this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI);
     },
   },
 };

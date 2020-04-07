@@ -1,5 +1,5 @@
 <template>
-  <header v-if="!isAuthScreen">
+  <header>
     <Logo></Logo>
     <div class="navigation"></div>
     <div class="account">
@@ -32,17 +32,6 @@ export default {
         },
       },
     };
-  },
-  computed: {
-    isAuthScreen() {
-      switch (this.$route.name) {
-        case 'login':
-        case 'register':
-          return true;
-        default:
-          return false;
-      }
-    },
   },
 };
 </script>

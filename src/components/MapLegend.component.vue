@@ -1,5 +1,5 @@
 <template>
-  <section v-if="!$store.getters.getMapState.loading" class="map-legend-wrapper">
+  <section class="map-legend-wrapper" :class="[ isLoading ]">
     <div class="map-legend" ref="legend" :style="{ background: createGradient, borderColor: getAQIColor }">
       <span v-show="getMouseoverAQI" class="legend-thumb" :style="{ left: getAQIPosition, background: getAQIColor }"></span>
     </div>
@@ -15,21 +15,21 @@
 <script>
 export default {
   computed: {
-    getActiveAQI() {
-      return this.$store.getters.getSelected('filter') || 'smart';
+    isLoading() {
+      return (this.$store.getters.getMapState.loading ? 'loading' : null);
     },
     getAQIColor() {
-      return this.$store.getters.getAQIColor(this.getActiveAQI);
+      return this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI);
     },
     getAQIMinMax() {
-      const { min, max } = this.$store.getters.getAQIMinMax(this.getActiveAQI);
+      const { min, max } = this.$store.getters.getAQIMinMax(this.$store.getters.getCurrentAQI);
       return { min, max };
     },
     getMouseoverAQI() {
       if (this.$store.getters.getMouseoverRegion === undefined) return undefined;
       const aqiData = this.$store.getters.getActiveData[this.$store.getters.getMouseoverRegion].aqi;
       if (aqiData === undefined) return undefined;
-      return aqiData[this.getActiveAQI];
+      return aqiData[this.$store.getters.getCurrentAQI];
     },
     getAQIPosition() {
       const aqi = this.getMouseoverAQI;
@@ -47,8 +47,8 @@ export default {
       return `${left}px`;
     },
     createGradient() {
-      const fromColor = this.$store.getters.getAQIHeatColor(this.getActiveAQI, this.getAQIMinMax.min);
-      const toColor = this.$store.getters.getAQIHeatColor(this.getActiveAQI, this.getAQIMinMax.max);
+      const fromColor = this.$store.getters.getAQIHeatColor(this.$store.getters.getCurrentAQI, this.getAQIMinMax.min);
+      const toColor = this.$store.getters.getAQIHeatColor(this.$store.getters.getCurrentAQI, this.getAQIMinMax.max);
       return `linear-gradient(to right, ${fromColor}, ${toColor})`;
     },
   },
@@ -63,6 +63,11 @@ export default {
   display: flex;
   flex-direction: column;
   text-shadow: none;
+  opacity: 1;
+  transition: opacity .2s ease;
+  &.loading {
+    opacity: 0;
+  }
   .map-legend {
     flex: 1;
     border: 1px solid $map-stroke-color;
