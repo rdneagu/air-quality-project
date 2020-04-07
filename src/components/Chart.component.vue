@@ -116,7 +116,7 @@ export default {
       this.chart.series.heatRules.push({
         target: this.chart.series.columns.template,
         property: 'fill',
-        min: am4core.color(aqiColor).lighten(-0.5),
+        min: am4core.color(aqiColor).lighten(-0.8),
         max: am4core.color(aqiColor),
         dataField: 'valueX',
       });
