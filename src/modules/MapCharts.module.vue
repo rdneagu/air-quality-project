@@ -2,7 +2,7 @@
   <section class="graphs-wrapper" :class="[ isLoading ]">
     <Chart measurement="most-polluted">HIGHEST VALUES IN DESCENDING ORDER</Chart>
     <div class="dominent-aqi" :style="{ color: getAQIColor.color }">
-      <div class="title">DOMINENT POLLUTANT</div>
+      <div class="title">DOMINANT POLLUTANT</div>
       <span class="round-aqi" :style="getAQIColor">{{ $store.getters.getDominentAQI }}</span>
     </div>
     <Chart measurement="most-polluted" :reversed="true">LOWEST VALUES IN ASCENDING ORDER</Chart>
