@@ -1,5 +1,5 @@
 <template>
-  <header v-tutorial="tutorial.first">
+  <header v-tutorial="tutorial.map">
     <Logo v-tutorial="tutorial.logo"></Logo>
     <div class="navbar"></div>
     <div class="navicon">
@@ -20,26 +20,26 @@ export default {
   data() {
     return {
       tutorial: {
-        first: {
-          step: 17,
+        logo: {
+          step: 14,
+          text: 'Click on the logo whenever you want to return to the home page',
+          pos: 'left',
+        },
+        account: {
+          step: 15,
+          text: 'Here you can manage your account',
+          pos: 'right',
+        },
+        map: {
+          step: 16,
           text: 'Remember that our map is completely interactive! You can use your cursor to navigate around'
            + '<br />* Dragging the map around will let you change the current view position'
            + '<br />* Scrolling up and down will let you zoom in and out'
            + '<br />* Clicking on any region will warp to that region and load the subunits',
           pos: 'top',
         },
-        logo: {
-          step: 15,
-          text: 'Click on the logo whenever you want to return to the home page',
-          pos: 'left',
-        },
-        account: {
-          step: 16,
-          text: 'Here you can manage your account',
-          pos: 'right',
-        },
         restart: {
-          step: 18,
+          step: 17,
           text: 'If you missed anything in the tutorial, clicking this button will reset it to the beginning',
           pos: 'right',
         },

@@ -20,17 +20,17 @@ export default {
     return {
       tutorial: {
         tophigh: {
-          step: 12,
+          step: 11,
           text: 'This chart shows the top values in descending order',
           pos: 'bottom',
         },
         dominant: {
-          step: 13,
+          step: 12,
           text: 'Shows which pollution index is dominant for the selected region',
           pos: 'bottom',
         },
         toplow: {
-          step: 14,
+          step: 13,
           text: 'This chart shows the top values in ascending order',
           pos: 'bottom',
         },

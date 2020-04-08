@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar-vue" v-tutorial="tutorial.info">
+  <div class="sidebar-vue">
     <transition name="sidebar-slide" appear>
       <div v-show="$store.getters.getSidebarVisibility" class="sidebar-wrapper" :style="{ color: getAQITextColor }">
         <div class="title" :style="getAQIFullColor">{{ getCurrentAQI }}</div>
@@ -17,17 +17,6 @@ import MapLegend from '@/components/MapLegend.component.vue';
 
 export default {
   components: { MapLegend },
-  data() {
-    return {
-      tutorial: {
-        info: {
-          step: 8,
-          text: 'The sidebar shows information about the selected air quality index',
-          pos: 'right',
-        },
-      },
-    };
-  },
   computed: {
     getSidebarContent() {
       const aqi = this.$store.getters.getCurrentAQI;
