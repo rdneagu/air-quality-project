@@ -1,6 +1,6 @@
 <template>
   <div class="chart-vue">
-    <div class="title" :style="{ color: getAQIColor }"><slot></slot></div>
+    <div class="title" :style="{ color: getAQITextColor }"><slot></slot></div>
     <div ref="chart" class="chart"></div>
   </div>
 </template>
@@ -34,12 +34,13 @@ export default {
     // Assign a new category set on the y-axis and apply some properties
     const categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
     categoryAxis.dataFields.category = 'city';
-    // categoryAxis.title.text = 'City';
-    categoryAxis.title.fill = am4core.color('#357a24');
     categoryAxis.renderer.grid.template.stroke = am4core.color('#357a24');
     categoryAxis.renderer.grid.template.disabled = true;
     categoryAxis.renderer.minGridDistance = 10;
     categoryAxis.renderer.labels.template.fill = am4core.color('#357a24');
+    categoryAxis.renderer.labels.template.truncate = true;
+    categoryAxis.renderer.labels.template.width = 150;
+    categoryAxis.renderer.labels.template.textAlign = 'end';
     // Disables the tooltip interaction for the categories axis
     categoryAxis.cursorTooltipEnabled = false;
     this.chart.axis.category = categoryAxis;
@@ -47,8 +48,6 @@ export default {
     // Assign a new value set on the x-axis and apply some properties
     const valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
     valueAxis.dataFields.value = 'value';
-    // valueAxis.title.text = 'AQI';
-    valueAxis.title.fill = am4core.color('#357a24');
     valueAxis.renderer.grid.template.stroke = am4core.color('#357a24');
     valueAxis.renderer.grid.template.disabled = true;
     valueAxis.renderer.labels.template.fill = am4core.color('#357a24');
@@ -62,10 +61,10 @@ export default {
     series.name = 'AQI';
     series.columns.template.fill = am4core.color('#01452c');
     series.columns.template.stroke = am4core.color('#357a24');
-    series.columns.template.height = 12;
+    const cellSize = 15;
+    series.columns.template.height = cellSize;
     series.dataFields.valueX = 'value';
     series.dataFields.categoryY = 'city';
-    // series.stacked = true;
     series.tooltipText = '{aqi}: [bold]{valueX}[/]';
     series.tooltip.label.fill = am4core.color('#357a24');
     series.tooltip.background.fill = am4core.color('#01120b');
@@ -74,6 +73,13 @@ export default {
     series.tooltip.getFillFromObject = false;
     series.tooltip.autoTextColor = false;
     this.chart.series = series;
+
+    chart.events.on('datavalidated', (ev) => {
+      const chart = ev.target; // eslint-disable-line no-shadow
+      const adjustHeight = chart.data.length * (cellSize + (cellSize / 2)) - categoryAxis.pixelHeight;
+      const targetHeight = chart.pixelHeight + adjustHeight;
+      chart.svgContainer.htmlElement.style.height = `${targetHeight}px`;
+    });
 
     // Create a chart cursor for interactivity but disable the X and Y grid lines
     chart.cursor = new am4charts.XYCursor();
@@ -90,8 +96,8 @@ export default {
     if (this.chart.model) { this.chart.model.dispose(); }
   },
   computed: {
-    getAQIColor() {
-      return am4core.color(this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI)).lighten(0.5).rgba;
+    getAQITextColor() {
+      return this.$store.getters.getAQITextColor(this.$store.getters.getCurrentAQI).rgba;
     },
   },
   methods: {
@@ -111,7 +117,6 @@ export default {
       this.chart.series.columns.template.fill = am4core.color(aqiColor).lighten(-0.5);
       this.chart.series.columns.template.stroke = am4core.color(aqiColor).lighten(0.2);
       const v = this.getMeasurement(aqi);
-      // console.log(v);
       this.chart.model.data = _.reverse(v);
       this.chart.series.heatRules.push({
         target: this.chart.series.columns.template,
@@ -122,7 +127,7 @@ export default {
       });
     },
     getMeasurement(aqi) {
-      let rows = this.$store.getters.getActiveData;
+      let rows;
       switch (this.measurement) {
         case 'most-polluted': {
           rows = _.flow(
@@ -134,7 +139,7 @@ export default {
             })),
             _.sortBy((item) => -item.value),
             _.uniqBy('value'),
-          )(rows);
+          )(this.$store.getters.getActiveData);
           break;
         } default: {
           break;
@@ -159,17 +164,17 @@ export default {
 
 <style lang="scss">
 .chart-vue {
-  height: 300px;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 15px 0;
   .title {
     font-size: 16px;
     font-weight: 700;
   }
   .chart {
     align-self: stretch;
+    justify-self: flex-start;
     flex: 1;
   }
 }
