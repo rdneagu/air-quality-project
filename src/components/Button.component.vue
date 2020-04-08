@@ -31,7 +31,7 @@ export default {
         const selectedId = this.$store.getters.getSelected(this.dropdown.id);
         return (selectedId) ? this.dropdown.items[this.getSelectedId] : '...';
       }
-      return this.text || (this.$slots.default.length ? this.$slots.default[0].text : 'Unknown');
+      return this.text || ((this.$slots.default && this.$slots.default.length) ? this.$slots.default[0].text : null);
     },
     isActive() {
       return ((this.dropdown && this.dropdown.visible) || this.$route.path.slice(1) === this.href) ? 'active' : false;
@@ -73,7 +73,10 @@ export default {
       top: 1px;
       margin: 0 8px 0 0; // Add spacing between icon and text on the right side of the icon [ICON  TEXT]
     }
-    .text { flex: 1 };
+    .text {
+      flex: 1;
+      font-weight: 600;
+    };
     &.inversed {
       .text { order: 1 };
       .icon-wrapper {
