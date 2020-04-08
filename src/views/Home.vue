@@ -29,7 +29,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-rows: 80px 700px 45px auto;
-  // grid-row-gap: 10px;
+  grid-row-gap: 10px;
   grid-template-areas: "header header"
                        "map sidebar"
                        "legend legend"
