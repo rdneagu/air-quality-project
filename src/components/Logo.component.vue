@@ -1,18 +1,20 @@
 <template>
-  <router-link :to="{ name: 'home' }" class="logo">
-    <div class="part-cloud">
-      <Icon name="cloud"></Icon>
-      <span class="text-aqi">CO2</span>
-      <Icon name="arrow_dr"></Icon>
-    </div>
-    <div class="part-name">
-      <span class="text-air">AIR</span>
-      <span class="text-quality">
-        <Icon name="leaf"></Icon>
-        <span>uality</span>
-      </span>
-    </div>
-  </router-link>
+  <div class="logo-vue">
+    <router-link :to="{ name: 'home' }" class="logo">
+      <div class="part-cloud">
+        <Icon name="cloud"></Icon>
+        <span class="text-aqi">CO2</span>
+        <Icon name="arrow_dr"></Icon>
+      </div>
+      <div class="part-name">
+        <span class="text-air">AIR</span>
+        <span class="text-quality">
+          <Icon name="leaf"></Icon>
+          <span>uality</span>
+        </span>
+      </div>
+    </router-link>
+  </div>
 </template>
 
 <script>
@@ -24,6 +26,9 @@ export default {
 </script>
 
 <style lang="scss">
+.logo-vue {
+  position: relative;
+}
 .logo {
   position: relative;
   display: flex;

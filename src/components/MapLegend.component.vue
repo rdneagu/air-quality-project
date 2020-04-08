@@ -1,25 +1,57 @@
 <template>
-  <section class="map-legend-wrapper" :class="[ isLoading ]">
+  <section class="map-legend-wrapper" :class="[ isLoading ]" v-tutorial="getTutorial('heatmap')">
     <div class="map-legend" ref="legend" :style="{ background: createGradient, borderColor: getAQIColor }">
-      <span v-show="getMouseoverAQI" class="legend-thumb" :style="{ left: getAQIPosition, background: getAQIColor }"></span>
+      <span v-if="!disabled" v-show="getMouseoverAQI" class="legend-thumb" :style="{ left: getAQIPosition, background: getAQIColor }"></span>
     </div>
-    <span class="range-value aqi-min" :style="{ color: getAQIColor }">{{ getAQIMinMax.min }}</span>
+    <span class="range-value aqi-min" :style="{ color: getAQITextColor }">{{ getAQIMinMax.min }}</span>
     <span class="range-value aqi-max">{{ getAQIMinMax.max }}</span>
-    <div class="label" :style="{ color: getAQIColor }">
-      <span class="label-minimum">MIN</span>
+    <div class="minmax" :style="{ color: getAQITextColor }">
+      <span class="label-minimum" v-tutorial="getTutorial('min')">MIN</span>
       <span class="label-maximum">MAX</span>
+    </div>
+    <div class="effect" :class="getAQIEffect" :style="{ color: getAQITextColor }">
+      <span class="label-worse">WORSE</span>
+      <span class="label-better" v-tutorial="getTutorial('better')">BETTER</span>
     </div>
   </section>
 </template>
 
 <script>
 export default {
+  props: ['disabled'],
+  data() {
+    return {
+      tutorial: {
+        heatmap: {
+          step: 9,
+          text: 'The heatmap shows where the values are in the range when a region is hovered',
+          pos: 'bottom',
+        },
+        min: {
+          step: 10,
+          text: 'Shows the minimum and maximum values available in the range',
+          pos: 'left',
+        },
+        better: {
+          step: 11,
+          text: 'Shows whether lower values are better or worse',
+          pos: 'left',
+        },
+      },
+    };
+  },
   computed: {
     isLoading() {
-      return (this.$store.getters.getMapState.loading ? 'loading' : null);
+      return (this.$store.getters.getMapState.loading && !this.disabled) ? 'loading' : null;
+    },
+    getAQIEffect() {
+      return (this.$store.getters.getAQIKeys[this.$store.getters.getCurrentAQI].effectInversed) ? 'w-to-b' : 'b-to-w';
     },
     getAQIColor() {
       return this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI);
+    },
+    getAQITextColor() {
+      return this.$store.getters.getAQITextColor(this.$store.getters.getCurrentAQI);
     },
     getAQIMinMax() {
       const { min, max } = this.$store.getters.getAQIMinMax(this.$store.getters.getCurrentAQI);
@@ -50,6 +82,12 @@ export default {
       const fromColor = this.$store.getters.getAQIHeatColor(this.$store.getters.getCurrentAQI, this.getAQIMinMax.min);
       const toColor = this.$store.getters.getAQIHeatColor(this.$store.getters.getCurrentAQI, this.getAQIMinMax.max);
       return `linear-gradient(to right, ${fromColor}, ${toColor})`;
+    },
+  },
+  methods: {
+    getTutorial(step) {
+      if (this.disabled) return undefined;
+      return this.tutorial[step];
     },
   },
 };
@@ -100,7 +138,7 @@ export default {
       color: #000;
     }
   }
-  .label {
+  .minmax {
     position: absolute;
     left: 0;
     right: 0;
@@ -110,13 +148,27 @@ export default {
       font-size: 14px;
       font-weight: 600;
     }
-    .label-minimum {
-      left: 2px;
+    .label-minimum { left: 2px; }
+    .label-maximum { right: 2px; }
+  }
+  .effect {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    > span {
+      position: absolute;
+      font-size: 14px;
+      font-weight: 600;
     }
-    .label-maximum {
-      right: 2px;
+    &.w-to-b {
+      .label-worse { left: 2px; }
+      .label-better { right: 2px; }
     }
-
+    &.b-to-w {
+      .label-better { left: 2px; }
+      .label-worse { right: 2px; }
+    }
   }
 }
 </style>

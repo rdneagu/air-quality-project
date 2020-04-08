@@ -1,11 +1,11 @@
 <template>
   <section class="graphs-wrapper" :class="[ isLoading ]">
-    <Chart measurement="most-polluted">HIGHEST VALUES IN DESCENDING ORDER</Chart>
-    <div class="dominent-aqi" :style="{ color: getAQIColor.color }">
-      <div class="title">DOMINANT POLLUTANT</div>
-      <span class="round-aqi" :style="getAQIColor">{{ $store.getters.getDominentAQI }}</span>
+    <Chart measurement="most-polluted" v-tutorial="tutorial.tophigh">HIGHEST VALUES IN DESCENDING ORDER</Chart>
+    <div class="dominent-aqi" v-tutorial="tutorial.dominant">
+      <div class="title" :style="{ color: getAQIColor.color }">DOMINANT POLLUTANT</div>
+      <span class="round-aqi" :style="getAQIColor">{{ getDominentAQI }}</span>
     </div>
-    <Chart measurement="most-polluted" :reversed="true">LOWEST VALUES IN ASCENDING ORDER</Chart>
+    <Chart measurement="most-polluted" :reversed="true" v-tutorial="tutorial.toplow">LOWEST VALUES IN ASCENDING ORDER</Chart>
   </section>
 </template>
 
@@ -16,7 +16,32 @@ import Chart from '../components/Chart.component.vue';
 
 export default {
   components: { Chart },
+  data() {
+    return {
+      tutorial: {
+        tophigh: {
+          step: 12,
+          text: 'This chart shows the top values in descending order',
+          pos: 'bottom',
+        },
+        dominant: {
+          step: 13,
+          text: 'Shows which pollution index is dominant for the selected region',
+          pos: 'bottom',
+        },
+        toplow: {
+          step: 14,
+          text: 'This chart shows the top values in ascending order',
+          pos: 'bottom',
+        },
+      },
+    };
+  },
   computed: {
+    getDominentAQI() {
+      const aqi = this.$store.getters.getDominentAQI;
+      return this.$store.getters.getAQIKeys[aqi].alias || aqi;
+    },
     getAQIColor() {
       const color = this.$store.getters.getAQIColor(this.$store.getters.getDominentAQI);
       return {
@@ -40,6 +65,7 @@ export default {
   grid-template-columns: 1fr 256px 1fr;
   grid-template-rows: 1fr;
   grid-column-gap: 40px;
+  margin: 20px;
   opacity: 1;
   transition: opacity .2s ease;
   &.loading {
@@ -51,7 +77,6 @@ export default {
     grid-template-columns: 1fr;
     align-items: center;
     justify-items: center;
-    margin-top: 15px;
     .title {
       font-size: 16px;
       font-weight: 700;
@@ -62,6 +87,7 @@ export default {
       justify-content: center;
       width: 128px;
       height: 128px;
+      margin-top: 15px;
       border-radius: 50%;
       border: 2px solid $map-fill-color;
       background: darken($map-stroke-color, 5%);

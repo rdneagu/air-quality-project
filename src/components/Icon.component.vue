@@ -1,11 +1,13 @@
 <template>
-  <router-link v-if="name && href && !disabled" :to="href" class="icon-wrapper">
-    <img v-if="img" :src="getImage" :class="[ getIcon ]" />
-    <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
-  </router-link>
-  <div v-else-if="name" class="icon-wrapper" :class="[ isDisabled ]" @click="OnIconClick">
-    <img v-if="img" :src="getImage" :class="[ getIcon ]" />
-    <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
+  <div class="icon-vue">
+    <router-link v-if="name && href && !disabled" :to="href" class="icon-wrapper">
+      <img v-if="img" :src="getImage" :class="[ getIcon ]" />
+      <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
+    </router-link>
+    <div v-else-if="name" class="icon-wrapper" :class="[ isDisabled ]" @click="OnIconClick">
+      <img v-if="img" :src="getImage" :class="[ getIcon ]" />
+      <i v-else class="icon" :class="[ getIcon, isPointer ]"></i>
+    </div>
   </div>
 </template>
 

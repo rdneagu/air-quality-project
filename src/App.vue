@@ -17,6 +17,10 @@ import Tooltip from './modules/Tooltip.module.vue';
 
 export default {
   components: { Header, Tooltip },
+  mounted() {
+    const isInTutorial = this.$cookies.get('tutorial');
+    this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
+  },
   computed: {
     isRoute() {
       return this.$route.name;
@@ -61,6 +65,7 @@ html, body, #app {
   background-color: $map-bg-color;
 }
 #app {
+  position: relative;
   display: grid;
   grid-template-rows: 1fr;
   grid-template-areas: "page";

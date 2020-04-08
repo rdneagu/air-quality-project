@@ -1,16 +1,18 @@
 <template>
-  <div class="map-wrapper" @mouseenter="showOverlay" @mouseleave="hideOverlay">
-    <transition name="fade-io-quick" appear>
-      <div v-show="!$store.getters.getMapState.initiating" class="map-model" ref="map" :style="polygonStrokeCSS"></div>
-    </transition>
-    <MapOverlay v-if="mapOverlay && !$store.getters.getMapState.initiating" :func="map.func"></MapOverlay>
-    <transition name="fade-io-quick" appear>
-      <div v-if="$store.getters.getMapState.loading" class="map-loading">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-      </div>
-    </transition>
+  <div class="map-wrapper-vue" v-tutorial="tutorial.first">
+    <div class="map-wrapper" @mouseenter="showOverlay" @mouseleave="hideOverlay">
+      <transition name="fade-io-quick" appear>
+        <div v-show="!$store.getters.getMapState.initiating" class="map-model" ref="map" :style="polygonStrokeCSS"></div>
+      </transition>
+      <MapOverlay v-if="$store.getters.getMapOverlay && !$store.getters.getMapState.initiating" :func="map.func"></MapOverlay>
+      <transition name="fade-io-quick" appear>
+        <div v-if="$store.getters.getMapState.loading" class="map-loading">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -32,6 +34,16 @@ export default {
   },
   data() {
     return {
+      tutorial: {
+        first: {
+          step: 1,
+          text: 'It looks like you are new here... click next and let me introduce you to our functions',
+          pos: 'bottom',
+          next: () => {
+            this.$store.commit('setMapOverlay', true);
+          },
+        },
+      },
       map: {
         model: undefined,
         // Functions that are passed to the overlay to control the map (need to be refactored)
@@ -56,7 +68,6 @@ export default {
         },
         stroke: '#01452c', // Required to override the region polygon strokes, changes everytime we change the filter
       },
-      mapOverlay: false,
     };
   },
   async mounted() {
@@ -116,10 +127,16 @@ export default {
           }
           return mapping;
         });
+        setTimeout(() => {
+          this.$store.state.sidebar.visible = true;
+        }, 500);
         this.$store.commit('setWorldData', { data });
         this.$store.commit('setMapState', { initiating: false, loading: false });
         this.updateAQIMinMax();
         this.showWorld();
+        // Prepare the tutorial if the user hasn't finished it yet
+        const isInTutorial = this.$cookies.get('tutorial');
+        this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
       } catch (e) {
         console.error(e);
       }
@@ -139,16 +156,19 @@ export default {
   methods: {
     updateActiveAQI() {
       const dominentCount = {};
-      const list = _.reduce(this.$store.getters.getActiveData, (acc, country) => {
-        dominentCount[country.dominent] = (dominentCount[country.dominent] || 0) + 1;
-        acc = { ...acc || {}, ...country.aqi };
-        return acc;
-      }, {});
-      if (!(this.$store.getters.getSelected('filter') in list)) {
+      const list = _.chain(this.$store.getters.getActiveData)
+        .reduce((acc, country) => {
+          dominentCount[country.dominent] = (dominentCount[country.dominent] || 0) + 1;
+          acc = { ...acc || {}, ...country.aqi };
+          return acc;
+        }, {})
+        .keys()
+        .reject((aqi) => aqi === 'smart' || !this.$store.getters.getAQIKeys[aqi])
+        .value();
+      if (!this.$store.getters.getAQIKeys[this.$store.getters.getCurrentAQI]) {
         this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
       }
-      delete list.smart;
-      this.$store.commit('setActiveAQI', { list: _.keys(list) });
+      this.$store.commit('setActiveAQI', { list });
       const dominentAQI = _(dominentCount)
         .map((count, aqi) => ({ aqi, count }))
         .sortBy('count')
@@ -156,8 +176,8 @@ export default {
       this.$store.commit('setDominentAQI', { aqi: dominentAQI.aqi });
     },
     updateAQIMinMax() {
-      _.forEach(this.$store.getters.getAQIKeys, (aqi) => {
-        const aqiNumbers = _.map(this.$store.getters.getWorldData, (country) => ((country.aqi && aqi in country.aqi) ? country.aqi[aqi].v : 0));
+      _.forEach(this.$store.getters.getAQIKeys, (data, aqi) => {
+        const aqiNumbers = _.map(this.$store.getters.getWorldData, (country) => ((country.aqi && country.aqi[aqi]) ? country.aqi[aqi].v : 0));
         const [min, max] = [_.min(aqiNumbers), _.max(aqiNumbers)];
         this.$store.commit('setAQIMinMax', { aqi, min, max });
       });
@@ -215,13 +235,13 @@ export default {
      * Shows the overlay
      */
     showOverlay() {
-      this.mapOverlay = true;
+      this.$store.commit('setMapOverlay', true);
     },
     /**
      * Hides the overlay
      */
     hideOverlay() {
-      this.mapOverlay = false;
+      this.$store.commit('setMapOverlay', false);
     },
     /**
      * Updates the minimum zoom allowed based on a document width ratio
@@ -382,7 +402,12 @@ export default {
 <style lang="scss">
 @import '~@/scss/_mixins';
 
+.map-wrapper-vue {
+  position: relative;
+  display: flex;
+}
 .map-wrapper {
+  flex: 1;
   position: relative;
   display: flex;
   border-top: 1px solid $map-stroke-color;

@@ -96,8 +96,8 @@ export default {
   .dropdown {
     position: absolute;
     left: calc(100% + 10px);
-    top: 0;
-    bottom: 0;
+    top: 5px;
+    bottom: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,8 +107,9 @@ export default {
     padding: 0 4px;
     overflow: hidden;
     z-index: 2;
-    .map-overlay-button {
+    .map-overlay-button-vue {
       opacity: 0;
+      margin: 0;
     }
   }
 }
