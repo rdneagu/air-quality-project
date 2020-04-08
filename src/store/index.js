@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import _ from 'lodash';
+
+import * as am4core from '@amcharts/amcharts4/core';
 
 Vue.use(Vuex);
 
@@ -11,24 +12,21 @@ export default new Vuex.Store({
       visible: false,
     },
     map: {
+      overlay: false,
       aqi: {
         smart: { color: '#008000' },
         h: { color: '#ff0000' },
         p: { color: '#800000' },
         w: { color: '#ffff00' },
-        t: { color: '#808000' },
-        pm25: { color: '#00ff00' },
+        pm25: { color: '#00ff00', alias: 'pm2.5' },
         pm10: { color: '#00ffff' },
-        dew: { color: '#008080' },
-        wg: { color: '#0000ff' },
+        dew: { color: '#008080', effectInversed: true },
         so2: { color: '#000080' },
         no2: { color: '#002366' },
         o3: { color: '#ff00ff' },
         co: { color: '#800080' },
-        r: { color: '#784212' },
         wd: { color: '#ff5733' },
         uvi: { color: '#ff6fee' },
-        mepaqi: { color: '#c0392b' },
         active: [],
         dominent: 'pm25',
       },
@@ -47,6 +45,10 @@ export default new Vuex.Store({
     },
     cache: {},
     tooltip: null,
+    tutorial: {
+      at: 0,
+      steps: [undefined],
+    },
   },
   getters: {
     getSidebarVisibility: (state) => state.sidebar.visible,
@@ -58,8 +60,9 @@ export default new Vuex.Store({
     //
     getMouseoverRegion: (state) => state.map.mouseover,
     // AQI related getters
-    getAQIKeys: (state) => _.keys(state.map.aqi),
+    getAQIKeys: (state) => state.map.aqi,
     getAQIColor: (state) => (aqi) => state.map.aqi[aqi].color,
+    getAQITextColor: (state, getters) => (aqi) => am4core.color(getters.getAQIColor(aqi)).lighten(0.5),
     getAQIHeatColor: (state, getters) => (aqi, val) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(state.map.aqi[aqi].color);
       const { min, max } = getters.getAQIMinMax(aqi);
@@ -83,8 +86,12 @@ export default new Vuex.Store({
     getCountryData: (state) => (country) => state.map.data.country[country],
     //
     getMapState: (state) => state.map.state,
+    getMapOverlay: (state) => state.map.overlay,
     //
     getTooltip: (state) => state.tooltip,
+    //
+    getTutorialAt: (state) => state.tutorial.at,
+    getTutorialSteps: (state) => state.tutorial.steps,
   },
   mutations: {
     setSelected(state, { id, item }) {
@@ -128,12 +135,24 @@ export default new Vuex.Store({
     setMapState(state, payload) {
       Vue.set(state.map, 'state', { ...state.map.state, ...payload });
     },
+    setMapOverlay(state, status) {
+      Vue.set(state.map, 'overlay', status);
+    },
     //
     showTooltip(state, tooltip) {
       state.tooltip = tooltip;
     },
     hideTooltip(state) {
       state.tooltip = null;
+    },
+    //
+    setTutorialAt(state, payload) {
+      const step = payload || (state.tutorial.at || 0) + 1;
+      Vue.set(state.tutorial, 'at', step);
+      Vue.$cookies.set('tutorial', step);
+    },
+    addTutorialStep(state, { step, text }) {
+      state.tutorial.steps.splice(step, 0, text);
     },
   },
   actions: {
