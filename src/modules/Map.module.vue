@@ -129,14 +129,14 @@ export default {
         });
         setTimeout(() => {
           this.$store.state.sidebar.visible = true;
+          // Prepare the tutorial if the user hasn't finished it yet
+          const isInTutorial = this.$cookies.get('tutorial');
+          this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
         }, 500);
         this.$store.commit('setWorldData', { data });
         this.$store.commit('setMapState', { initiating: false, loading: false });
         this.updateAQIMinMax();
         this.showWorld();
-        // Prepare the tutorial if the user hasn't finished it yet
-        const isInTutorial = this.$cookies.get('tutorial');
-        this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
       } catch (e) {
         console.error(e);
       }

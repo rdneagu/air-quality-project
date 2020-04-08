@@ -17,10 +17,6 @@ import Tooltip from './modules/Tooltip.module.vue';
 
 export default {
   components: { Header, Tooltip },
-  mounted() {
-    const isInTutorial = this.$cookies.get('tutorial');
-    this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
-  },
   computed: {
     isRoute() {
       return this.$route.name;
