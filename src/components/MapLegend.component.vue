@@ -22,21 +22,9 @@ export default {
   data() {
     return {
       tutorial: {
-        heatmap: {
-          step: 8,
-          text: 'The heatmap shows where the values are in the range when a region is hovered',
-          pos: 'bottom',
-        },
-        min: {
-          step: 9,
-          text: 'Shows the minimum and maximum values available in the range',
-          pos: 'left',
-        },
-        better: {
-          step: 10,
-          text: 'Shows whether lower values are better or worse',
-          pos: 'left',
-        },
+        heatmap: { step: 8, text: 'The heatmap shows where the values are in the range when a region is hovered', pos: 'bottom' },
+        min: { step: 9, text: 'Shows the minimum and maximum values available in the range', pos: 'left' },
+        better: { step: 10, text: 'Shows whether lower values are better or worse', pos: 'left' },
       },
     };
   },

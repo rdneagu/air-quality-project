@@ -34,36 +34,12 @@ export default {
   data() {
     return {
       tutorial: {
-        smart: {
-          step: 2,
-          text: 'This button changes the current air quality index statistic',
-          pos: 'left',
-        },
-        home: {
-          step: 3,
-          text: 'This button takes to your home region',
-          pos: 'right',
-        },
-        zoomIn: {
-          step: 4,
-          text: 'This button zooms in the map',
-          pos: 'right',
-        },
-        sidebar: {
-          step: 5,
-          text: 'This button toggles the sidebar which contains information about the selected filter',
-          pos: 'right',
-        },
-        zoomOut: {
-          step: 6,
-          text: 'This button zooms out the map',
-          pos: 'right',
-        },
-        reset: {
-          step: 7,
-          text: 'This button resets the map to default state (completely zooms out and centers)',
-          pos: 'right',
-        },
+        smart: { step: 2, text: 'Changes the current air quality index statistic', pos: 'left' },
+        home: { step: 3, text: 'Takes you to your home region', pos: 'right' },
+        zoomIn: { step: 4, text: 'Zooms in the map', pos: 'right' },
+        sidebar: { step: 5, text: 'Toggles the sidebar which contains information about the selected filter', pos: 'right' },
+        zoomOut: { step: 6, text: 'Zooms out the map', pos: 'right' },
+        reset: { step: 7, text: 'Resets the map to default state (completely zooms out and centers)', pos: 'right' },
       },
     };
   },

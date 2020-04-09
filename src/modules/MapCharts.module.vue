@@ -19,21 +19,9 @@ export default {
   data() {
     return {
       tutorial: {
-        tophigh: {
-          step: 11,
-          text: 'This chart shows the top values in descending order',
-          pos: 'bottom',
-        },
-        dominant: {
-          step: 12,
-          text: 'Shows which pollution index is dominant for the selected region',
-          pos: 'bottom',
-        },
-        toplow: {
-          step: 13,
-          text: 'This chart shows the top values in ascending order',
-          pos: 'bottom',
-        },
+        tophigh: { step: 11, text: 'This chart shows the top values in descending order', pos: 'bottom' },
+        dominant: { step: 12, text: 'Shows which pollution index is dominant for the selected region', pos: 'bottom' },
+        toplow: { step: 13, text: 'This chart shows the top values in ascending order', pos: 'bottom' },
       },
     };
   },
