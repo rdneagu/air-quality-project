@@ -26,6 +26,9 @@ export default {
     if (this.$cookies.get('overview') === null) {
       this.$store.commit('setOverview', true);
     }
+    // Prepare the tutorial if the user hasn't finished it yet
+    const isInTutorial = this.$cookies.get('tutorial');
+    this.$store.commit('setTutorialAt', Number.parseInt(isInTutorial, 10) || 1);
   },
 };
 </script>

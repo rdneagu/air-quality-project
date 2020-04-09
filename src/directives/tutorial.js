@@ -15,6 +15,7 @@ const tutorialDirective = {
       text: binding.value.text,
       pos: binding.value.pos,
       step: binding.value.step,
+      button: binding.value.button,
       next: () => {
         if (typeof (binding.value.next) === 'function') binding.value.next();
         setTimeout(() => {

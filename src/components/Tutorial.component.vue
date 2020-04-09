@@ -2,7 +2,7 @@
   <transition name="tooltipfx" appear>
     <div v-if="isAtStep" class="tutorial-vue" :class="[ pos ]">
       <span class="tip" v-html="text"></span>
-      <Button type="dialog" :click="next">Next</Button>
+      <Button type="dialog" :click="next">{{ button || 'Next' }}</Button>
     </div>
   </transition>
 </template>
@@ -12,7 +12,7 @@ import Button from '@/components/Button.component.vue';
 
 export default {
   components: { Button },
-  props: ['text', 'pos', 'next', 'step'],
+  props: ['text', 'pos', 'button', 'next', 'step'],
   computed: {
     isAtStep() {
       return (this.$store.getters.getTutorialAt === this.step);

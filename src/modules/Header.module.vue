@@ -35,7 +35,7 @@ export default {
            + '<br />* Clicking on any region will warp to that region and load the subunits',
           pos: 'top',
         },
-        restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will display the overview page', pos: 'right' },
+        restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will display the overview page', pos: 'right', button: 'Finish' },
       },
       account: {
         name: 'account',
