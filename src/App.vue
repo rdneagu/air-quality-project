@@ -20,9 +20,19 @@ import Overview from './modules/Overview.module.vue';
 export default {
   components: { Header, Tooltip, Overview },
   computed: {
+    /**
+     * Returns the current route name (URL path)
+     *
+     * @returns {String}  The current URL path
+     */
     isRoute() {
       return this.$route.name;
     },
+    /**
+     * Returns whether the current screen is for authentication
+     *
+     * @returns {Boolean}  True or false whether the URL is login or register
+     */
     isAuthScreen() {
       switch (this.$route.name) {
         case 'login':
@@ -42,6 +52,9 @@ export default {
     },
   },
   watch: {
+    /**
+     * Watcher to change the title according to the loaded route defaulting to 'Air Quality'
+     */
     $route(to) {
       document.title = to.meta.title || 'Air Quality';
     },

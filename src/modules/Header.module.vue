@@ -15,7 +15,7 @@
 import Logo from '@/components/Logo.component.vue';
 import Button from '@/components/Button.component.vue';
 
-import AccountDropdown from '@/components/DropdownMenu/account.dropdown.vue';
+import AccountDropdown from '@/components/DropdownMenu/Account.dropdown.vue';
 
 export default {
   components: { Logo, Button },

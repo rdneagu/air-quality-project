@@ -15,12 +15,7 @@ import MapLegend from '../components/MapLegend.component.vue';
 import MapCharts from '../modules/MapCharts.module.vue';
 
 export default {
-  components: {
-    Map,
-    Sidebar,
-    MapLegend,
-    MapCharts,
-  },
+  components: { Map, Sidebar, MapLegend, MapCharts },
   mounted() {
     // If the user hasn't viewed the overview yet, pop it in his face
     if (this.$cookies.get('overview') === null) {

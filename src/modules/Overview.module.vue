@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     /**
-     * Hide the overview and proceed showing the main page
+     * Hides the overview and proceed showing the main page
      */
     start(skip) {
       // If the tutorial is not being skipped, start the tutorial

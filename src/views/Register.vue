@@ -50,6 +50,9 @@ export default {
       },
     };
   },
+  /**
+   * Vue method that gets called when a <keep-alive> element is displayed
+   */
   activated() {
     this.clear();
   },
