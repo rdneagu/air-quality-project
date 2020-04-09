@@ -21,6 +21,12 @@ export default {
     MapLegend,
     MapCharts,
   },
+  mounted() {
+    // If the user hasn't viewed the overview yet, pop it in his face
+    if (this.$cookies.get('overview') === null) {
+      this.$store.commit('setOverview', true);
+    }
+  },
 };
 </script>
 

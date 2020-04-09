@@ -8,15 +8,17 @@
       </keep-alive>
     </transition>
     <Tooltip />
+    <Overview />
   </div>
 </template>
 
 <script>
 import Header from './modules/Header.module.vue';
 import Tooltip from './modules/Tooltip.module.vue';
+import Overview from './modules/Overview.module.vue';
 
 export default {
-  components: { Header, Tooltip },
+  components: { Header, Tooltip, Overview },
   computed: {
     isRoute() {
       return this.$route.name;
