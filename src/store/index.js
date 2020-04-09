@@ -48,8 +48,10 @@ export default new Vuex.Store({
     tooltip: null,
     tutorial: {
       at: 0,
+      last: 17,
       steps: [undefined],
     },
+    overview: false,
   },
   getters: {
     getSidebarVisibility: (state) => state.sidebar.visible,
@@ -93,6 +95,9 @@ export default new Vuex.Store({
     //
     getTutorialAt: (state) => state.tutorial.at,
     getTutorialSteps: (state) => state.tutorial.steps,
+    getTutorialLast: (state) => state.tutorial.last,
+    //
+    getOverview: (state) => state.overview,
     //
     getUser: (state) => state.user,
   },
@@ -156,6 +161,10 @@ export default new Vuex.Store({
     },
     addTutorialStep(state, { step, text }) {
       state.tutorial.steps.splice(step, 0, text);
+    },
+    //
+    setOverview(state, status) {
+      Vue.set(state, 'overview', status);
     },
     //
     setUser(state, user) {
