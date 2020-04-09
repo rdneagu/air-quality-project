@@ -3,7 +3,7 @@
     <Logo v-tutorial="tutorial.logo"></Logo>
     <div class="navbar"></div>
     <div class="navicon">
-      <Button :class="[ shine ]" icon="refresh" type="menu" :click="restartTutorial" v-tutorial="tutorial.restart" v-tooltip="tooltip.restart"></Button>
+      <Button :class="[ shine ]" icon="lightbulb" type="menu" :click="displayOverview" v-tutorial="tutorial.restart" v-tooltip="tooltip.restart"></Button>
     </div>
     <div class="account">
       <Button v-bind="account" v-tutorial="tutorial.account"></Button>
@@ -22,7 +22,7 @@ export default {
   data() {
     return {
       tooltip: {
-        restart: { text: 'Restart the tutorial' },
+        restart: { text: 'Show the overview' },
       },
       tutorial: {
         logo: { step: 14, text: 'Click on the logo whenever you want to return to the home page', pos: 'left' },
@@ -35,7 +35,7 @@ export default {
            + '<br />* Clicking on any region will warp to that region and load the subunits',
           pos: 'top',
         },
-        restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will reset it to the beginning', pos: 'right' },
+        restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will display the overview page', pos: 'right' },
       },
       account: {
         name: 'account',
@@ -50,7 +50,7 @@ export default {
             login: { icon: 'person', text: 'Login', type: 'dropdown', href: { name: 'login' } },
             register: { icon: 'person_add', text: 'Register', type: 'dropdown', href: { name: 'register' } },
           },
-          custom: (this.$store.getters.getUser) ? AccountDropdown : null,
+          custom: this.getAccountDropdown(),
         },
       },
     };
@@ -61,8 +61,16 @@ export default {
     },
   },
   methods: {
-    restartTutorial() {
-      this.$store.commit('setTutorialAt', 1);
+    getAccountDropdown(user) {
+      return (user) ? AccountDropdown : null;
+    },
+    displayOverview() {
+      this.$store.commit('setOverview', true);
+    },
+  },
+  watch: {
+    '$store.getters.getUser': function OnUserChange(to) {
+      this.$set(this.account.dropdown, 'custom', this.getAccountDropdown(to));
     },
   },
 };
