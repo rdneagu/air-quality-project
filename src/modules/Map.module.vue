@@ -74,8 +74,8 @@ export default {
   async mounted() {
     this.$store.commit('setMapState', { initiating: true, loading: true });
     await this.$nextTick();
-    const worldSeriesResult = await axios.get('http://3.22.57.250:8090/map');
-    // const worldSeriesResult = await axios.get('/api/getWorld');
+    // const worldSeriesResult = await axios.get('http://3.22.57.250:8090/map');
+    const worldSeriesResult = await axios.get('/api/getWorld');
     const map = am4core.create(this.$refs.map, am4maps.MapChart);
     this.map.model = map;
     map.projection = new am4maps.projections.Mercator();
