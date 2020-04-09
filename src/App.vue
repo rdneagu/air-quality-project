@@ -8,7 +8,7 @@
       </keep-alive>
     </transition>
     <Tooltip />
-    <Overview />
+    <Overview v-if="isOverviewVisible" />
   </div>
 </template>
 
@@ -31,6 +31,14 @@ export default {
         default:
           return false;
       }
+    },
+    /**
+     * Returns whether the overview should be visible or not
+     *
+     * @returns {Boolean}  True or false whether the overview is visible or not
+     */
+    isOverviewVisible() {
+      return this.$store.getters.getOverview;
     },
   },
   watch: {

@@ -1,6 +1,6 @@
 <template>
   <transition name="tooltipfx" appear>
-    <div v-if="isOverviewVisible" class="overview-vue">
+    <div class="overview-vue">
       <Logo />
       <section class="intro">
         <h1 class="welcome">Welcome to the air pollution tracker “Air Quality”</h1>
@@ -10,7 +10,7 @@
         </div>
         <div id="intro-2" class="intro-panel">
           <div class="intro-img"></div>
-          <div class="intro-txt">Charts that represent the most and least affected areas by a selected Air Quality Index</div>
+          <div class="intro-txt">Charts that represent the most and least affected areas by a selected Air Quality Index along the dominant pollutant in the selected region</div>
         </div>
         <div id="intro-3" class="intro-panel">
           <div class="intro-img"></div>
@@ -39,14 +39,6 @@ export default {
      */
     hasFinishedTutorial() {
       return (this.$cookies.get('tutorial') || 0) >= this.$store.getters.getTutorialLast;
-    },
-    /**
-     * Returns whether the overview should be visible or not
-     *
-     * @returns {Boolean}  True or false whether the overview is visible or not
-     */
-    isOverviewVisible() {
-      return this.$store.getters.getOverview;
     },
   },
   methods: {
