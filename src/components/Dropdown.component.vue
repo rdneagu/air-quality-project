@@ -1,7 +1,7 @@
 <template>
   <transition @enter="dropdownEnter" @leave="dropdownLeave" @afterEnter="dropdownAfterEnter" appear>
     <div v-show="dropdown.visible" class="dropdown-vue" :class="[ dropdown.style ]">
-      <component v-if="custom" :is="custom" :id="getId" class="dropdown" />
+      <component v-if="dropdown.custom" :is="dropdown.custom" :id="getId" class="dropdown" />
       <div v-else :id="getId" class="dropdown">
         <Button v-for="(item, id) in dropdown.items" :key="id" v-bind="item" :name="getItemName(id)" :click="select.bind(null, id)">{{ item.text }}</Button>
       </div>
@@ -17,7 +17,7 @@ export default {
   components: {
     Button: () => import('@/components/Button.component.vue'),
   },
-  props: ['dropdown', 'custom'],
+  props: ['dropdown'],
   created() {
     if (!this.getSelected && !this.dropdown.ignoreSelection) {
       this.$store.commit('setSelected', { id: this.dropdown.id, item: util.findDefault(this.dropdown.items) });
@@ -98,6 +98,7 @@ export default {
     border-width: 0 6px 6px 6px;
     border-style: solid;
     border-color: $map-fill-color transparent;
+    z-index: 1;
   }
   &:after {
     content: "";
@@ -107,6 +108,7 @@ export default {
     border-width: 0 6px 6px 6px;
     border-style: solid;
     border-color: darken($map-stroke-color, 10%) transparent;
+    z-index: 1;
   }
   .dropdown {
     display: flex;
