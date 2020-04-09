@@ -115,6 +115,7 @@ export default {
         if (!response.data) {
           throw 'Something went wrong';
         } else {
+          this.$store.commit('setUser', response.data);
           this.$router.push('/');
         }
       } catch (e) {
