@@ -15,6 +15,8 @@
 import Logo from '@/components/Logo.component.vue';
 import Button from '@/components/Button.component.vue';
 
+import AccountDropdown from '@/components/DropdownMenu/account.dropdown.vue';
+
 export default {
   components: { Logo, Button },
   data() {
@@ -48,6 +50,7 @@ export default {
             login: { icon: 'person', text: 'Login', type: 'dropdown', href: { name: 'login' } },
             register: { icon: 'person_add', text: 'Register', type: 'dropdown', href: { name: 'register' } },
           },
+          custom: (this.$store.getters.getUser) ? AccountDropdown : null,
         },
       },
     };
