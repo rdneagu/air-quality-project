@@ -3,7 +3,7 @@
     <div class="bg"></div>
     <div class="form-wrapper">
       <Logo />
-      <form class="login-form">
+      <form class="login-form" @keydown.enter="lastPassFix" @keyup.enter="submit()">
         <div class="title">{{ form.title }}</div>
         <section class="fields">
           <div v-for="(input, id) in form.input" :key="id" :id="formatInputId(id)" class="input-wrapper" :class="[ hasFailed(input) ]">
@@ -37,7 +37,7 @@ export default {
     return {
       form: {
         title: 'Authenticate',
-        action: 'http://3.16.90.231:8090/user/auth',
+        action: 'http://3.22.57.250:8090/user/auth',
         input: {
           userName: { icon: 'person', type: 'text', placeholder: 'USERNAME' },
           password: { icon: 'lock', type: 'password', placeholder: 'PASSWORD' },
@@ -57,6 +57,14 @@ export default {
     },
   },
   methods: {
+    /**
+     * Blocks the error thrown by LastPass when enter is pressed while form is in focus
+     *
+     * @param {Object} ev         - The event data holder
+     */
+    lastPassFix(ev) {
+      ev.stopImmediatePropagation();
+    },
     /**
      * Formats the input element class based on the id passed in
      *
@@ -116,7 +124,7 @@ export default {
           throw 'Something went wrong';
         } else {
           this.$store.commit('setUser', response.data);
-          this.$router.push('/');
+          this.$router.push({ name: 'home' });
         }
       } catch (e) {
         _.forEach(this.form.input, (input, key) => {
