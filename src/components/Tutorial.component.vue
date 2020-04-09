@@ -1,6 +1,6 @@
 <template>
   <transition name="tooltipfx" appear>
-    <div v-if="isAtStep" class="tutorial-test" :class="[ pos ]">
+    <div v-if="isAtStep" class="tutorial-vue" :class="[ pos ]">
       <span class="tip" v-html="text"></span>
       <Button type="dialog" :click="next">Next</Button>
     </div>
@@ -24,7 +24,7 @@ export default {
 <style lang="scss">
 @import '~@/scss/_mixins';
 
-.tutorial-test {
+.tutorial-vue {
   position: absolute;
   display: flex;
   align-items: center;
@@ -39,7 +39,7 @@ export default {
   text-shadow: none !important;
   font-size: 14px !important;
   white-space: pre;
-  z-index: 5000;
+  z-index: 10;
   @include transition('opacity', .2s, ease);
   .tip {
     margin-right: 10px;
@@ -83,8 +83,8 @@ export default {
     transform: translateY(-50%);
     &:before { border-left: 5px solid; }
     &:after {
-      z-index: 10;
-      margin-left: -1px;
+      z-index: 1;
+      margin-left: -2px;
       border-left: 5px solid $map-bg-color;
     }
     &.alert:after { border-left: 5px solid darken($color-error, 60%); }
@@ -95,8 +95,8 @@ export default {
     transform: translateX(-50%);
     &:before { border-top: 5px solid; }
     &:after {
-      margin-top: -1px;
-      z-index: 10;
+      margin-top: -2px;
+      z-index: 1;
       border-top: 5px solid $map-bg-color;
     }
     &.alert:after { border-top: 5px solid darken($color-error, 60%); }
@@ -117,8 +117,8 @@ export default {
       border-right: 5px solid;
     }
     &:after {
-      left: -12px;
-      z-index: 10;
+      left: -11px;
+      z-index: 1;
       border-right: 5px solid $map-bg-color;
     }
     &.alert:after { border-right: 5px solid darken($color-error, 60%); }
@@ -132,8 +132,8 @@ export default {
       border-bottom: 5px solid;
     }
     &:after {
-      top: -5px;
-      z-index: 10;
+      top: -4px;
+      z-index: 1;
       border-bottom: 5px solid $map-bg-color;
     }
     &.alert:after { border-bottom: 5px solid darken($color-error, 60%); }
