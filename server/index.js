@@ -11,9 +11,9 @@ app.use(cors());
 
 app.use('/api', api);
 
-/* app.use((req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
-}); */
+});
 
 // const axios = require('axios');
 // const _ = require('lodash');
