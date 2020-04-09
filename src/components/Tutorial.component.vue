@@ -36,7 +36,7 @@ export default {
   color: $color-text !important;
   background-color: $map-bg-color !important;
   box-shadow: 0 0 20px rgba(#000, .5) !important;
-  text-shadow: none !important;
+  text-shadow: 1px 1px 1px #000 !important;
   font-size: 14px !important;
   white-space: pre;
   z-index: 10;
