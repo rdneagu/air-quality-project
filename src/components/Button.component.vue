@@ -70,7 +70,6 @@ export default {
     cursor: pointer;
     .icon-wrapper {
       position: relative;
-      top: 1px;
       margin: 0 8px 0 0; // Add spacing between icon and text on the right side of the icon [ICON  TEXT]
     }
     .text {
