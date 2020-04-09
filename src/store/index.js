@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    user: null,
     selected: {},
     sidebar: {
       visible: false,
@@ -92,6 +93,8 @@ export default new Vuex.Store({
     //
     getTutorialAt: (state) => state.tutorial.at,
     getTutorialSteps: (state) => state.tutorial.steps,
+    //
+    getUser: (state) => state.user,
   },
   mutations: {
     setSelected(state, { id, item }) {
@@ -153,6 +156,10 @@ export default new Vuex.Store({
     },
     addTutorialStep(state, { step, text }) {
       state.tutorial.steps.splice(step, 0, text);
+    },
+    //
+    setUser(state, user) {
+      Vue.set(state, 'user', user);
     },
   },
   actions: {
