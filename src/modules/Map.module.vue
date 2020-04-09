@@ -165,7 +165,7 @@ export default {
         .keys()
         .reject((aqi) => aqi === 'smart' || !this.$store.getters.getAQIKeys[aqi])
         .value();
-      if (!this.$store.getters.getAQIKeys[this.$store.getters.getCurrentAQI]) {
+      if (list.indexOf(this.$store.getters.getCurrentAQI) === -1) {
         this.$store.commit('setSelected', { id: 'filter', item: 'smart' });
       }
       this.$store.commit('setActiveAQI', { list });
@@ -302,7 +302,6 @@ export default {
                 });
                 const aqifeed = await Promise.all(promises);
                 const data = _.map(aqifeed, (city, id) => {
-                  console.log(this.map.series.countrySeries.data[id].name);
                   const mapping = { id };
                   if (city.data.status === 'ok') {
                     return {
@@ -364,7 +363,7 @@ export default {
             const poly = this.map.series.worldSeries.dataItems.values.find((c) => c.dataContext.name === geolocation.data.region_name);
             this.enterCountry(poly.mapPolygon);
           } catch (e) {
-            console.log(e);
+            console.error(e);
             this.viewZoom('reset');
           }
           break;
