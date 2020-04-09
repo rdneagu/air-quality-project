@@ -96,12 +96,22 @@ export default {
     right: 18px;
     border-width: 0 6px 6px 6px;
     border-style: solid;
+    border-color: $map-fill-color transparent;
+  }
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: calc(100% - 12px);
+    right: 18px;
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
     border-color: darken($map-stroke-color, 10%) transparent;
   }
   .dropdown {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    border-top: 1px solid $map-fill-color;
     background-color: darken($map-stroke-color, 10%);
     border-radius: 4px;
     box-shadow: 0 0 20px #000;
