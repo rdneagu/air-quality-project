@@ -115,7 +115,7 @@ export default {
     @include transition('background-color, border', .2s, ease);
     &:not(.disabled) {
       &.active, &:hover {
-        background-color: darken($color-text, 40%);
+        background-color: darken($color-text, 30%);
         border-color: $color-text;
       }
     }
