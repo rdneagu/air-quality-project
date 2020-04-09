@@ -83,10 +83,10 @@ export default {
   padding-top: 10px;
   z-index: 5;
   &.account {
-    width: 200px;
     top: 40px;
     left: unset;
     .dropdown {
+      width: 200px;
       max-height: 400px;
     }
   }
