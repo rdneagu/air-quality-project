@@ -71,6 +71,15 @@ export default {
   // }
 }
 
+.icon-lightbulb-aqp:before {
+  content: "\e922";
+}
+.icon-power_off-aqp:before {
+  content: "\e921";
+}
+.icon-phone_msg-aqp:before {
+  content: "\e920";
+}
 .icon-spinner-aqp:before, .icon-spinner-2-aqp:before {
   animation: Spin 1s linear infinite;
   text-shadow: 0 0 2px #000;
