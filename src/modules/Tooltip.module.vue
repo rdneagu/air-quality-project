@@ -1,7 +1,7 @@
 <template>
   <transition name="tooltipfx">
-    <div v-if="getTooltip" class="tooltip" :class="[ getTooltip.type, arrowPosition ]" :style="tooltipPosition">
-      <span>{{ getTooltip.text }}</span>
+    <div v-if="getTooltip" class="tooltip-vue" :class="[ getTooltip.type, arrowPosition ]" :style="tooltipPosition">
+      <span class="tip">{{ getTooltip.text }}</span>
     </div>
   </transition>
 </template>
@@ -40,6 +40,20 @@ export default {
         };
         this.tooltipPosition = {};
         this.arrowPosition = 'bottom';
+        if (position.x.px - tooltip.offsetWidth <= 0 || position.x.px + tooltip.offsetWidth >= document.documentElement.clientWidth) {
+          position.y = { css: 'top', px: preset.middle };
+          if (position.x.px - tooltip.offsetWidth <= 0) {
+            position.x = { css: 'left', px: preset.right };
+            this.arrowPosition = 'left';
+          }
+          if (position.x.px + tooltip.offsetWidth >= document.documentElement.clientWidth) {
+            position.x = { css: 'right', px: preset.left };
+            this.arrowPosition = 'right';
+          }
+        } else if (top - tooltip.offsetHeight - 10 <= 0) {
+          position.y = { css: 'top', px: preset.bottom };
+          this.arrowPosition = 'top';
+        }
         this.tooltipPosition[position.x.css] = `${position.x.px}px`;
         this.tooltipPosition[position.y.css] = `${position.y.px}px`;
       });
@@ -51,7 +65,7 @@ export default {
 <style lang="scss">
 @import '~@/scss/_mixins';
 
-.tooltip {
+.tooltip-vue {
   position: absolute;
   display: flex;
   align-items: center;
@@ -63,8 +77,9 @@ export default {
   box-shadow: 0 0 20px rgba(#000, .5);
   font-size: 14px;
   white-space: pre;
-  z-index: 5000;
+  z-index: 10;
   @include transition('opacity', .2s, ease);
+  .tip { font-weight: 600; }
   &:before, &:after {
     content: "";
     position: absolute;
@@ -99,8 +114,8 @@ export default {
   &.right {
     &:before { border-left: 5px solid; }
     &:after {
-      z-index: 10;
-      margin-left: -1px;
+      z-index: 1;
+      margin-left: -2px;
       border-left: 5px solid $map-bg-color;
     }
     &.alert:after { border-left: 5px solid darken($color-error, 60%); }
@@ -108,8 +123,8 @@ export default {
   &.bottom {
     &:before { border-top: 5px solid; }
     &:after {
-      margin-top: -1px;
-      z-index: 10;
+      margin-top: -2px;
+      z-index: 1;
       border-top: 5px solid $map-bg-color;
     }
     &.alert:after { border-top: 5px solid darken($color-error, 60%); }
@@ -120,8 +135,8 @@ export default {
       border-right: 5px solid;
     }
     &:after {
-      left: -12px;
-      z-index: 10;
+      left: -11px;
+      z-index: 1;
       border-right: 5px solid $map-bg-color;
     }
     &.alert:after { border-right: 5px solid darken($color-error, 60%); }
@@ -132,8 +147,8 @@ export default {
       border-bottom: 5px solid;
     }
     &:after {
-      top: -5px;
-      z-index: 10;
+      top: -4px;
+      z-index: 1;
       border-bottom: 5px solid $map-bg-color;
     }
     &.alert:after { border-bottom: 5px solid darken($color-error, 60%); }
