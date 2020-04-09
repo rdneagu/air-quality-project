@@ -26,11 +26,12 @@ export default {
         const el = to.element;
         const tooltip = this.$el;
         const { left, top } = el.getBoundingClientRect();
+        const { clientHeight, clientWidth } = document.querySelector('#app');
         const preset = {
-          top: document.documentElement.clientHeight - top + 15,
+          top: clientHeight - top + 15,
           middle: top + el.offsetHeight / 2 - tooltip.offsetHeight / 2,
           bottom: top + el.offsetHeight + 10,
-          left: document.documentElement.clientWidth - left + 10,
+          left: clientWidth - left + 10,
           center: left + el.offsetWidth / 2 - tooltip.offsetWidth / 2,
           right: left + el.offsetWidth + 10,
         };
@@ -40,13 +41,13 @@ export default {
         };
         this.tooltipPosition = {};
         this.arrowPosition = 'bottom';
-        if (position.x.px - tooltip.offsetWidth <= 0 || position.x.px + tooltip.offsetWidth >= document.documentElement.clientWidth) {
+        if (position.x.px - tooltip.offsetWidth <= 0 || position.x.px + tooltip.offsetWidth >= clientWidth) {
           position.y = { css: 'top', px: preset.middle };
           if (position.x.px - tooltip.offsetWidth <= 0) {
             position.x = { css: 'left', px: preset.right };
             this.arrowPosition = 'left';
           }
-          if (position.x.px + tooltip.offsetWidth >= document.documentElement.clientWidth) {
+          if (position.x.px + tooltip.offsetWidth >= clientWidth) {
             position.x = { css: 'right', px: preset.left };
             this.arrowPosition = 'right';
           }
