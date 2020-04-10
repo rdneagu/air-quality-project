@@ -1,7 +1,9 @@
 <template>
   <header v-tutorial="tutorial.map">
     <Logo v-tutorial="tutorial.logo"></Logo>
-    <div class="navbar"></div>
+    <div class="navbar">
+      <Button v-for="(button, key) in navButtons" :key="key" v-bind="button"></Button>
+    </div>
     <div class="navicon">
       <Button :class="[ shine ]" icon="lightbulb" type="menu" :click="displayOverview" v-tutorial="tutorial.restart" v-tooltip="tooltip.restart"></Button>
     </div>
@@ -36,6 +38,10 @@ export default {
           pos: 'top',
         },
         restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will display the overview page', pos: 'right', button: 'Finish' },
+      },
+      navButtons: {
+        team: { name: 'team', icon: 'group', text: 'Our Team', type: 'menu', href: { name: 'team' } },
+        about: { name: 'about', icon: 'group', text: 'About Us', type: 'menu', href: { name: 'team' } },
       },
       account: {
         name: 'account',
@@ -84,11 +90,21 @@ header {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   grid-template-rows: auto;
+  grid-column-gap: 20px;
   align-items: center;
+  height: 80px;
   padding: 0 20px;
-  margin-top: 10px;
+  border-bottom: 1px solid $map-stroke-color;
+  background-color: $map-bg-color;
+  .navbar {
+    display: flex;
+    margin-left: 40px;
+    .button {
+      margin: 0 5px;
+    }
+  }
   .navicon {
-    margin: 0 40px;
+    margin: 0 20px;
     .button.menu-style { font-size: 24px; }
     .shine { animation: shine 1.5s ease-in-out infinite; }
   }
