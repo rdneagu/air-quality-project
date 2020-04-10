@@ -2,7 +2,7 @@
   <div class="profile">
     <div class="info">
       <div class="avatar">
-        <Icon name="person"></Icon>
+        <Icon name="user-circle"></Icon>
       </div>
       <div class="username">{{ getUser.userName }}</div>
     </div>
@@ -64,7 +64,7 @@ export default {
       };
       try {
         this.$set(this.control.email, 'pending', true);
-        await axios.post('http://3.22.57.250:8090/email', data);
+        await axios.post('http://18.191.197.201:8090/email', data);
       } catch (e) {
         console.error(e);
       }
@@ -78,7 +78,7 @@ export default {
       };
       try {
         this.$set(this.control.sms, 'pending', true);
-        await axios.post('http://3.22.57.250:8090/text', data);
+        await axios.post('http://18.191.197.201:8090/text', data);
       } catch (e) {
         console.error(e);
       }
