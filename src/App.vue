@@ -101,6 +101,7 @@ a {
 html, body, #app {
   min-height: 100vh;
   background-color: $map-bg-color;
+  min-width: 900px;
 }
 #app {
   position: relative;
