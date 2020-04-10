@@ -3,7 +3,8 @@
     <transition name="fade-in" mode="out-in" appear>
       <keep-alive>
         <router-view class="page">
-          <Header v-if="!isAuthScreen" slot="header" />
+          <div class="bg"></div>
+          <Header v-if="!isAuthScreen" />
         </router-view>
       </keep-alive>
     </transition>
@@ -13,12 +14,17 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 import Header from './modules/Header.module.vue';
 import Tooltip from './modules/Tooltip.module.vue';
 import Overview from './modules/Overview.module.vue';
 
 export default {
   components: { Header, Tooltip, Overview },
+  async mounted() {
+    await this.getSession();
+  },
   computed: {
     /**
      * Returns the current route name (URL path)
@@ -49,6 +55,19 @@ export default {
      */
     isOverviewVisible() {
       return this.$store.getters.getOverview;
+    },
+  },
+  methods: {
+    async getSession() {
+      try {
+        const res = await axios.get('http://18.191.197.201:8090/session/user');
+        if (!res.data) {
+          throw 'Session mismatch';
+        }
+        this.$store.commit('setUser', res.data);
+      } catch (e) {
+        this.$store.commit('setUser', null);
+      }
     },
   },
   watch: {
@@ -99,6 +118,23 @@ html, body, #app {
     grid-area: page;
     overflow: hidden;
     transition: opacity .4s ease;
+    .bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: url('./assets/images/login-bg.jpg') no-repeat center center / cover;
+      opacity: .1;
+      &:after {
+        content: '';
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: $map-fill-color;
+        mix-blend-mode: hard-light;
+      }
+    }
   }
 }
 *::selection {
