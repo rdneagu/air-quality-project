@@ -6,10 +6,13 @@
       </transition>
       <MapOverlay v-if="$store.getters.getMapOverlay && !$store.getters.getMapState.initiating" :func="map.func"></MapOverlay>
       <transition name="fade-io-quick" appear>
-        <div v-if="$store.getters.getMapState.loading" class="map-loading">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
+        <div v-if="$store.getters.getMapState.loading" class="map-loading" :class="[ getLoadingStatus ]">
+          <div class="spinner">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+          <span class="message">{{ formatLoadingMessage }}</span>
         </div>
       </transition>
     </div>
@@ -117,36 +120,45 @@ export default {
     this.map.series.countrySeries = countrySeries;
 
     worldSeries.events.on('datavalidated', async () => {
-      try {
-        const promises = _.map(worldSeries.data, (r) => {
-          const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
-          // const response = axios.get(`http://codegod.xyz:8090/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
-          return response;
-        });
-        const aqifeed = await Promise.all(promises);
-        const data = _.map(aqifeed, (country, id) => {
-          const mapping = { id };
-          if (country.data.status === 'ok') {
-            return {
-              ...mapping,
-              name: this.map.series.worldSeries.data[id].name,
-              code: this.map.series.worldSeries.data[id].id,
-              aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
-              dominent: country.data.data.dominentpol,
-            };
-          }
-          return mapping;
-        });
-        setTimeout(() => {
-          this.$store.state.sidebar.visible = true;
-        }, 500);
-        this.$store.commit('setWorldData', { data });
-        this.$store.commit('setMapState', { initiating: false, loading: false });
-        this.updateAQIMinMax();
-        this.showWorld();
-      } catch (e) {
-        console.error(e);
-      }
+      this.$store.commit('setMapState', { retries: 0, timeout: 0 });
+      const load = async () => {
+        try {
+          this.$store.commit('setMapState', { status: 'pending' });
+          const promises = _.map(worldSeries.data, (r) => {
+            const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+            // const response = axios.get(`http://codegod.xyz:8090/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
+            return response;
+          });
+          const aqifeed = await Promise.all(promises);
+          const data = _.map(aqifeed, (country, id) => {
+            const mapping = { id };
+            if (country.data.status === 'ok') {
+              return {
+                ...mapping,
+                name: this.map.series.worldSeries.data[id].name,
+                code: this.map.series.worldSeries.data[id].id,
+                aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
+                dominent: country.data.data.dominentpol,
+              };
+            }
+            return mapping;
+          });
+          setTimeout(() => {
+            this.$store.state.sidebar.visible = true;
+            this.$store.commit('setMapOverlay', true);
+          }, 500);
+          this.$store.commit('setWorldData', { data });
+          this.$store.commit('setMapState', { initiating: false, loading: false });
+          this.updateAQIMinMax();
+          this.showWorld();
+        } catch (e) {
+          const retries = (this.$store.getters.getMapState.retries || 0) + 1;
+          const timeout = (this.$store.getters.getMapState.timeout || 5000) * 2;
+          this.$store.commit('setMapState', { retries, timeout, status: 'failed' });
+          setTimeout(async () => { await load(); }, timeout);
+        }
+      };
+      await load();
     });
   },
   beforeDestroy() {
@@ -158,6 +170,21 @@ export default {
     },
     polygonStrokeCSS() {
       return { '--stroke': this.map.stroke };
+    },
+    getLoadingStatus() {
+      return this.$store.getters.getMapState.status;
+    },
+    formatLoadingMessage() {
+      const { retries, timeout, status } = this.$store.getters.getMapState;
+      let message = 'Loading...';
+      if (status === 'pending' && retries) {
+        message = 'Retrying...';
+      } else if (status === 'failed' && retries) {
+        message = `Failed ${retries} time${retries !== 1 ? 's' : ''}. Retrying again in ${timeout / 1000} seconds`;
+      } else if (status === 'failed' && !retries) {
+        message = 'Failed. Returning back in 10 seconds';
+      }
+      return message;
     },
   },
   methods: {
@@ -284,7 +311,7 @@ export default {
      */
     enterCountry(target) {
       // Zoom in the clicked region and display the inner regions when the animation finishes
-      this.$store.commit('setMapState', { loading: true });
+      this.$store.commit('setMapState', { loading: true, retries: 0, timeout: 0, status: 'pending' });
       this.map.zoom.animation = target.series.chart.zoomToMapObject(target);
       this.map.zoom.animation.events.once('animationended', async () => {
         const code = target.dataItem.dataContext.id;
@@ -323,14 +350,17 @@ export default {
                 });
                 this.$store.commit('setCountryData', { country: code, data });
               } catch (e) {
-                console.error(e);
+                this.$store.commit('setMapState', { status: 'failed' });
+                setTimeout(this.viewZoom.bind(this, 'reset'), 10000);
               }
             }
-            this.$store.commit('setActiveData', { data: this.$store.getters.getCountryData(code) });
-            this.$set(this.map.series, 'target', this.map.series.countrySeries);
-            this.map.zoom.animation = undefined;
-            this.$store.commit('setMapState', { loading: false });
-            this.showCountry();
+            if (this.$store.getters.getCountryData(code)) {
+              this.$store.commit('setActiveData', { data: this.$store.getters.getCountryData(code) });
+              this.$set(this.map.series, 'target', this.map.series.countrySeries);
+              this.map.zoom.animation = undefined;
+              this.$store.commit('setMapState', { loading: false });
+              this.showCountry();
+            }
           });
         }
       });
@@ -429,20 +459,35 @@ export default {
     right: 0;
     bottom: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at center, rgba(#000, 0.8) 0%, transparent 200%);
-
-    .bar {
-      width: 20px;
-      height: 20px;
-      background-color: transparent;
-      border: 4px solid $map-stroke-color;
-      animation: loading 1.5s ease infinite;
-      margin: 0 5px;
-      &:nth-child(1) { animation-delay: -1.0s }
-      &:nth-child(2) { animation-delay: -0.5s }
-      &:nth-child(3) { animation-delay: 0.0s }
+    .spinner {
+      display: flex;
+      .bar {
+        width: 20px;
+        height: 20px;
+        background-color: transparent;
+        border: 4px solid $color-text;
+        animation: loading 1.5s ease infinite;
+        margin: 0 5px;
+        &:nth-child(1) { animation-delay: -1.0s }
+        &:nth-child(2) { animation-delay: -0.5s }
+        &:nth-child(3) { animation-delay: 0.0s }
+      }
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    &.failed {
+      .bar {
+        border-color: $color-error;
+        animation-name: loadingError;
+      }
+      .message { color: $color-error; }
     }
   }
   svg g g g g g g g g g g g {
@@ -451,14 +496,13 @@ export default {
 }
 
 @keyframes loading {
-  0% {
-    background-color: transparent;
-  }
-  25% {
-    background-color: $map-fill-color;
-  }
-  50%, 100% {
-    background-color: transparent;
-  }
+  0% { background-color: transparent; }
+  25% { background-color: $map-stroke-color; }
+  50%, 100% { background-color: transparent; }
+}
+@keyframes loadingError {
+  0% { background-color: transparent; }
+  25% { background-color: darken($color-error, 30%); }
+  50%, 100% { background-color: transparent; }
 }
 </style>
