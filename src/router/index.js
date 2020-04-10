@@ -14,9 +14,12 @@ const routes = [
     },
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    path: '/team',
+    name: 'team',
+    meta: {
+      title: 'Air Quality - Project Team',
+    },
+    component: () => import('../views/Team.vue'),
   },
   {
     path: '/login',
@@ -24,7 +27,7 @@ const routes = [
     meta: {
       title: 'Air Quality - Login',
     },
-    component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue'),
+    component: () => import('../views/Login.vue'),
   },
   {
     path: '/register',
@@ -32,7 +35,7 @@ const routes = [
     meta: {
       title: 'Air Quality - Register',
     },
-    component: () => import(/* webpackChunkName: "about" */ '../views/Register.vue'),
+    component: () => import('../views/Register.vue'),
   },
   {
     path: '*',
@@ -40,7 +43,7 @@ const routes = [
     meta: {
       title: 'Air Quality - Page not found',
     },
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    component: () => import('../views/404.vue'),
   },
 ];
 
