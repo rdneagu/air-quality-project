@@ -7,11 +7,21 @@
 
 <script>
 import _ from 'lodash/fp';
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
+import {
+  create as am4create,
+  color as am4color,
+  useTheme as am4useTheme,
+} from '@amcharts/amcharts4/core';
+import {
+  XYCursor as am4XYCursor,
+  XYChart as am4XYChart,
+  CategoryAxis as am4CategoryAxis,
+  ValueAxis as am4ValueAxis,
+  ColumnSeries as am4ColumnSeries,
+} from '@amcharts/amcharts4/charts';
 import am4themesAnimated from '@amcharts/amcharts4/themes/animated';
 
-am4core.useTheme(am4themesAnimated);
+am4useTheme(am4themesAnimated);
 
 export default {
   props: ['title', 'measurement', 'reversed'],
@@ -29,15 +39,15 @@ export default {
   },
   mounted() {
     // Create an amChart4 chart of type XYChart using the Vue $reference
-    const chart = am4core.create(this.$refs.chart, am4charts.XYChart);
+    const chart = am4create(this.$refs.chart, am4XYChart);
 
     // Assign a new category set on the y-axis and apply some properties
-    const categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+    const categoryAxis = chart.yAxes.push(new am4CategoryAxis());
     categoryAxis.dataFields.category = 'city';
-    categoryAxis.renderer.grid.template.stroke = am4core.color('#357a24');
+    categoryAxis.renderer.grid.template.stroke = am4color('#357a24');
     categoryAxis.renderer.grid.template.disabled = true;
     categoryAxis.renderer.minGridDistance = 10;
-    categoryAxis.renderer.labels.template.fill = am4core.color('#357a24');
+    categoryAxis.renderer.labels.template.fill = am4color('#357a24');
     categoryAxis.renderer.labels.template.truncate = true;
     categoryAxis.renderer.labels.template.width = 150;
     categoryAxis.renderer.labels.template.textAlign = 'end';
@@ -46,29 +56,29 @@ export default {
     this.chart.axis.category = categoryAxis;
 
     // Assign a new value set on the x-axis and apply some properties
-    const valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+    const valueAxis = chart.xAxes.push(new am4ValueAxis());
     valueAxis.dataFields.value = 'value';
-    valueAxis.renderer.grid.template.stroke = am4core.color('#357a24');
+    valueAxis.renderer.grid.template.stroke = am4color('#357a24');
     valueAxis.renderer.grid.template.disabled = true;
-    valueAxis.renderer.labels.template.fill = am4core.color('#357a24');
+    valueAxis.renderer.labels.template.fill = am4color('#357a24');
     valueAxis.renderer.labels.template.fillOpacity = 0;
     // Disables the tooltip interaction for the values axis
     valueAxis.cursorTooltipEnabled = false;
     this.chart.axis.value = valueAxis;
 
     // Declare a new Column data series to represent our data and apply some properties
-    const series = chart.series.push(new am4charts.ColumnSeries());
+    const series = chart.series.push(new am4ColumnSeries());
     series.name = 'AQI';
-    series.columns.template.fill = am4core.color('#01452c');
-    series.columns.template.stroke = am4core.color('#357a24');
+    series.columns.template.fill = am4color('#01452c');
+    series.columns.template.stroke = am4color('#357a24');
     const cellSize = 15;
     series.columns.template.height = cellSize;
     series.dataFields.valueX = 'value';
     series.dataFields.categoryY = 'city';
     series.tooltipText = '{aqi}: [bold]{valueX}[/]';
-    series.tooltip.label.fill = am4core.color('#357a24');
-    series.tooltip.background.fill = am4core.color('#01120b');
-    series.tooltip.background.stroke = am4core.color('#357a24');
+    series.tooltip.label.fill = am4color('#357a24');
+    series.tooltip.background.fill = am4color('#01120b');
+    series.tooltip.background.stroke = am4color('#357a24');
     series.tooltip.background.strokeWidth = 1;
     series.tooltip.getFillFromObject = false;
     series.tooltip.autoTextColor = false;
@@ -82,7 +92,7 @@ export default {
     });
 
     // Create a chart cursor for interactivity but disable the X and Y grid lines
-    chart.cursor = new am4charts.XYCursor();
+    chart.cursor = new am4XYCursor();
     chart.cursor.lineX.disabled = true;
     chart.cursor.lineY.disabled = true;
     chart.cursor.behavior = 'none';
@@ -104,25 +114,25 @@ export default {
     updateAQIHeatMap() {
       const aqi = this.$store.getters.getCurrentAQI;
       const aqiColor = this.$store.getters.getAQIColor(aqi);
-      this.chart.axis.category.renderer.labels.template.fill = am4core.color(aqiColor).lighten(0.5);
-      this.chart.axis.value.renderer.labels.template.fill = am4core.color(aqiColor).lighten(0.5);
+      this.chart.axis.category.renderer.labels.template.fill = am4color(aqiColor).lighten(0.5);
+      this.chart.axis.value.renderer.labels.template.fill = am4color(aqiColor).lighten(0.5);
       const { min, max } = this.$store.getters.getAQIMinMax(aqi);
       this.chart.axis.value.min = min;
       this.chart.axis.value.max = max;
       this.chart.axis.value.strictMinMax = true;
       this.chart.axis.value.baseValue = min;
-      this.chart.series.tooltip.label.fill = am4core.color(aqiColor).lighten(0.5);
-      this.chart.series.tooltip.background.fill = am4core.color(aqiColor).lighten(-0.5);
-      this.chart.series.tooltip.background.stroke = am4core.color(aqiColor).lighten(0.5);
-      this.chart.series.columns.template.fill = am4core.color(aqiColor).lighten(-0.5);
-      this.chart.series.columns.template.stroke = am4core.color(aqiColor).lighten(0.2);
+      this.chart.series.tooltip.label.fill = am4color(aqiColor).lighten(0.5);
+      this.chart.series.tooltip.background.fill = am4color(aqiColor).lighten(-0.5);
+      this.chart.series.tooltip.background.stroke = am4color(aqiColor).lighten(0.5);
+      this.chart.series.columns.template.fill = am4color(aqiColor).lighten(-0.5);
+      this.chart.series.columns.template.stroke = am4color(aqiColor).lighten(0.2);
       const v = this.getMeasurement(aqi);
       this.chart.model.data = _.reverse(v);
       this.chart.series.heatRules.push({
         target: this.chart.series.columns.template,
         property: 'fill',
-        min: am4core.color(aqiColor).lighten(-0.8),
-        max: am4core.color(aqiColor),
+        min: am4color(aqiColor).lighten(-0.8),
+        max: am4color(aqiColor),
         dataField: 'valueX',
       });
     },

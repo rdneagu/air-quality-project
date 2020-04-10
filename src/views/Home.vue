@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <slot name="header" />
+    <slot />
     <Map />
     <Sidebar />
     <MapLegend />
@@ -32,8 +32,7 @@ export default {
 #app .home {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: 80px 700px 45px auto;
-  grid-row-gap: 10px;
+  grid-template-rows: auto 700px 70px auto;
   grid-template-areas: "header header"
                        "map sidebar"
                        "legend legend"
@@ -43,7 +42,7 @@ export default {
     grid-area: map;
   }
   .map-legend-wrapper {
-    margin-top: 15px;
+    margin: 20px 0;
     grid-area: legend;
   }
 }

@@ -11,7 +11,9 @@
 </template>
 
 <script>
-import * as am4core from '@amcharts/amcharts4/core';
+import {
+  color as am4color,
+} from '@amcharts/amcharts4/core';
 
 import MapLegend from '@/components/MapLegend.component.vue';
 
@@ -35,7 +37,7 @@ export default {
       const bg = this.$store.getters.getAQIColor(this.$store.getters.getCurrentAQI);
       return {
         color,
-        backgroundColor: am4core.color(bg).lighten(-0.5),
+        backgroundColor: am4color(bg).lighten(-0.5),
         borderColor: color,
       };
     },
@@ -61,6 +63,7 @@ export default {
                        "legend";
   background-color: #000;
   border: 1px solid $map-stroke-color;
+  border-top: none;
   border-right: none;
   padding: 20px 0 40px 0;
   width: 350px;

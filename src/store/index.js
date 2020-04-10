@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import * as am4core from '@amcharts/amcharts4/core';
+import {
+  color as am4color,
+} from '@amcharts/amcharts4/core';
 
 Vue.use(Vuex);
 
@@ -65,7 +67,7 @@ export default new Vuex.Store({
     // AQI related getters
     getAQIKeys: (state) => state.map.aqi,
     getAQIColor: (state) => (aqi) => state.map.aqi[aqi].color,
-    getAQITextColor: (state, getters) => (aqi) => am4core.color(getters.getAQIColor(aqi)).lighten(0.5),
+    getAQITextColor: (state, getters) => (aqi) => am4color(getters.getAQIColor(aqi)).lighten(0.5),
     getAQIHeatColor: (state, getters) => (aqi, val) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(state.map.aqi[aqi].color);
       const { min, max } = getters.getAQIMinMax(aqi);

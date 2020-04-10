@@ -18,15 +18,24 @@
 
 <script>
 import _ from 'lodash';
-// import * as _fp from 'lodash/fp';
 import axios from 'axios';
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4maps from '@amcharts/amcharts4/maps';
+import {
+  create as am4create,
+  color as am4color,
+  useTheme as am4useTheme,
+  MouseCursorStyle as am4MouseCursorStyle,
+} from '@amcharts/amcharts4/core';
+import {
+  MapChart as am4MapChart,
+  projections as am4projections,
+  MapPolygonSeries as am4MapPolygonSeries,
+} from '@amcharts/amcharts4/maps';
+
 import am4themesAnimated from '@amcharts/amcharts4/themes/animated';
 
 import MapOverlay from '../components/MapOverlay/MapOverlay.component.vue';
 
-am4core.useTheme(am4themesAnimated);
+am4useTheme(am4themesAnimated);
 
 export default {
   components: {
@@ -76,21 +85,21 @@ export default {
     await this.$nextTick();
     // const worldSeriesResult = await axios.get('http://3.22.57.250:8090/map');
     const worldSeriesResult = await axios.get('/api/getWorld');
-    const map = am4core.create(this.$refs.map, am4maps.MapChart);
+    const map = am4create(this.$refs.map, am4MapChart);
     this.map.model = map;
-    map.projection = new am4maps.projections.Mercator();
+    map.projection = new am4projections.Mercator();
     this.updateMinimumZoom();
     map.minZoomLevel = this.map.zoom.min;
     map.maxZoomLevel = this.map.zoom.max;
     // World Map
-    const worldSeries = map.series.push(new am4maps.MapPolygonSeries());
+    const worldSeries = map.series.push(new am4MapPolygonSeries());
     this.configSeries(worldSeries);
     worldSeries.geodata = worldSeriesResult.data;
     const worldPolygon = worldSeries.mapPolygons.template;
     this.configPolygon(worldPolygon);
     worldPolygon.tooltipText = '{name}: ({aqi})';
     // Country
-    const countrySeries = map.series.push(new am4maps.MapPolygonSeries());
+    const countrySeries = map.series.push(new am4MapPolygonSeries());
     this.configSeries(countrySeries);
     const countryPolygon = countrySeries.mapPolygons.template;
     this.configPolygon(countryPolygon);
@@ -183,13 +192,13 @@ export default {
     updateAQIHeatMap() {
       const aqi = this.$store.getters.getCurrentAQI;
       const aqiColor = this.$store.getters.getAQIColor(aqi);
-      this.map.series.target.mapPolygons.template.stroke = am4core.color(aqiColor).lighten(-0.5);
-      this.map.stroke = (am4core.color(aqiColor).lighten(0.5)).rgba;
+      this.map.series.target.mapPolygons.template.stroke = am4color(aqiColor).lighten(-0.5);
+      this.map.stroke = (am4color(aqiColor).lighten(0.5)).rgba;
       _.forEach(this.$store.getters.getActiveData, (country, id) => {
         let tooltip = 'No data recorded for this Air Quality Index';
-        this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color('rgba(0, 0, 0, 1)');
+        this.map.series.target.dataItems.values[id].mapPolygon.fill = am4color('rgba(0, 0, 0, 1)');
         if (country.aqi && (country.aqi[aqi] && !_.isNaN(country.aqi[aqi].aqi))) {
-          this.map.series.target.dataItems.values[id].mapPolygon.fill = am4core.color(this.$store.getters.getAQIHeatColor(aqi, country.aqi[aqi].v));
+          this.map.series.target.dataItems.values[id].mapPolygon.fill = am4color(this.$store.getters.getAQIHeatColor(aqi, country.aqi[aqi].v));
           tooltip = `${aqi}: ${country.aqi[aqi].v.toFixed(1)} μ/mg`;
         }
         this.map.series.target.data[id].aqi = tooltip;
@@ -200,10 +209,10 @@ export default {
      */
     configSeries(series) {
       series.useGeodata = true;
-      series.tooltip.background.fill = am4core.color('#01120b');
-      series.tooltip.background.stroke = am4core.color('#357a24');
+      series.tooltip.background.fill = am4color('#01120b');
+      series.tooltip.background.stroke = am4color('#357a24');
       series.tooltip.background.strokeWidth = 1;
-      series.tooltip.label.fill = am4core.color('#357a24');
+      series.tooltip.label.fill = am4color('#357a24');
       series.tooltip.getFillFromObject = false;
       series.tooltip.autoTextColor = false;
     },
@@ -215,10 +224,10 @@ export default {
       polygon.nonScalingStroke = true;
       polygon.strokeOpacity = 0.8;
       polygon.strokeWidth = 0.4;
-      polygon.fill = am4core.color('#000000');
-      polygon.stroke = am4core.color('#01452c');
+      polygon.fill = am4color('#000000');
+      polygon.stroke = am4color('#01452c');
       polygon.propertyFields.fill = 'color';
-      polygon.cursorOverStyle = am4core.MouseCursorStyle.pointer;
+      polygon.cursorOverStyle = am4MouseCursorStyle.pointer;
       polygon.events.on('over', (evt) => {
         const id = _.findIndex(evt.target.series.mapPolygons.values, (p) => p.uid === evt.target.uid);
         this.$store.commit('setMouseoverRegion', { id });
@@ -407,7 +416,6 @@ export default {
   flex: 1;
   position: relative;
   display: flex;
-  border-top: 1px solid $map-stroke-color;
   border-bottom: 1px solid $map-stroke-color;
   background-color: #000;
   overflow: hidden;
