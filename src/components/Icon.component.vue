@@ -71,6 +71,12 @@ export default {
   // }
 }
 
+.icon-group-aqp:before {
+  content: "\e924";
+}
+.icon-user-circle-aqp:before {
+  content: "\e923";
+}
 .icon-lightbulb-aqp:before {
   content: "\e922";
 }
