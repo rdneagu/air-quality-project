@@ -122,8 +122,14 @@ export default {
       // Submit the form data
       try {
         this.$set(this.form.control.submit, 'pending', true);
-        await axios.post(this.form.action, data);
-        this.$router.push({ name: 'login' });
+        const response = await axios.post(this.form.action, data);
+        // Format the input errors if there are any
+        if (!response.data) {
+          throw 'Something went wrong';
+        } else {
+          this.$store.commit('setUser', response.data);
+          this.$router.push({ name: 'home' });
+        }
       } catch (e) {
         _.forEach(this.form.input, (input, key) => {
           this.$set(this.form.input[key], 'error', 'One of the fields is invalid!');
