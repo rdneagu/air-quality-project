@@ -61,7 +61,7 @@ export default {
     async getSession() {
       try {
         const res = await axios.get('http://18.191.197.201:8090/session/user');
-        if (!res.data) {
+        if (res.data === 'anonymousUser') {
           throw 'Session mismatch';
         }
         this.$store.commit('setUser', res.data);
