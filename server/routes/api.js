@@ -1,7 +1,6 @@
 const express = require('express');
 
 const worldMap = require('../geodata/worldMapCountries.json');
-const countryStats = require('../geodata/pollution.json');
 
 const router = express.Router();
 
@@ -14,10 +13,6 @@ router.get('/getCountry', async (req, res) => {
   const json = require(`../geodata/countries/${country}.json`); // eslint-disable-line
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.send(json);
-});
-
-router.get('/countryStats', async (req, res) => {
-  res.send(countryStats);
 });
 
 module.exports = router;
