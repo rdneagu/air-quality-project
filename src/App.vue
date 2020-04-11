@@ -126,6 +126,7 @@ html, body, #app {
       top: 0;
       bottom: 0;
       background: url('./assets/images/login-bg.jpg') no-repeat center center / cover;
+      background-attachment: fixed;
       opacity: .1;
       &:after {
         content: '';
