@@ -386,6 +386,15 @@ export default {
         this.showWorld();
       }
     },
+    getPermission() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve,
+          () => {
+            alert('Geolocation permission is denied\n\nPlease check your site permissions and try again!'); // eslint-disable-line no-alert
+            reject(new Error('Geolocation permission denied'));
+          });
+      });
+    },
     /**
      * Handles different view functions
      */
@@ -396,11 +405,15 @@ export default {
         case 'home':
           this.showWorld();
           try {
+            await this.getPermission();
             const geolocation = await axios.get('https://freegeoip.app/json/');
             const poly = this.map.series.worldSeries.dataItems.values.find((c) => c.dataContext.name === geolocation.data.region_name);
+            if (!poly) {
+              alert('Geolocation failed\n\nYour location is probably not supported at the moment!'); // eslint-disable-line no-alert
+              throw 'Geolocation failed';
+            }
             this.enterCountry(poly.mapPolygon);
           } catch (e) {
-            console.error(e);
             this.viewZoom('reset');
           }
           break;
@@ -469,7 +482,7 @@ export default {
         width: 20px;
         height: 20px;
         background-color: transparent;
-        border: 4px solid $color-text;
+        border: 4px solid $map-stroke-color;
         animation: loading 1.5s ease infinite;
         margin: 0 5px;
         &:nth-child(1) { animation-delay: -1.0s }
@@ -484,7 +497,7 @@ export default {
     }
     &.failed {
       .bar {
-        border-color: $color-error;
+        border-color: darken($color-error, 20%);
         animation-name: loadingError;
       }
       .message { color: $color-error; }
@@ -497,12 +510,12 @@ export default {
 
 @keyframes loading {
   0% { background-color: transparent; }
-  25% { background-color: $map-stroke-color; }
+  25% { background-color: $color-text; }
   50%, 100% { background-color: transparent; }
 }
 @keyframes loadingError {
   0% { background-color: transparent; }
-  25% { background-color: darken($color-error, 30%); }
+  25% { background-color: $color-error; }
   50%, 100% { background-color: transparent; }
 }
 </style>
