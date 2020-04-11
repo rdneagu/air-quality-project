@@ -22,6 +22,14 @@ const routes = [
     component: () => import('../views/Team.vue'),
   },
   {
+    path: '/pollution',
+    name: 'pollution',
+    meta: {
+      title: 'Air Quality - About Pollution',
+    },
+    component: () => import('../views/Pollution.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     meta: {
