@@ -41,7 +41,7 @@ export default {
       },
       navButtons: {
         team: { name: 'team', icon: 'group', text: 'Our Team', type: 'menu', href: { name: 'team' } },
-        about: { name: 'about', icon: 'group', text: 'About Us', type: 'menu', href: { name: 'team' } },
+        about: { name: 'pollution', icon: 'leaf', text: 'Pollution', type: 'menu', href: { name: 'pollution' } },
       },
       account: {
         name: 'account',
