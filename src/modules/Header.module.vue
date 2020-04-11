@@ -2,7 +2,7 @@
   <header v-tutorial="tutorial.map">
     <Logo v-tutorial="tutorial.logo"></Logo>
     <div class="navbar">
-      <Button v-for="(button, key) in navButtons" :key="key" v-bind="button"></Button>
+      <Button v-for="(button, key) in navButtons" :key="key" v-bind="button" v-tutorial="tutorial[key]"></Button>
     </div>
     <div class="navicon">
       <Button :class="[ shine ]" icon="lightbulb" type="menu" :click="displayOverview" v-tutorial="tutorial.restart" v-tooltip="tooltip.restart"></Button>
@@ -28,20 +28,21 @@ export default {
       },
       tutorial: {
         logo: { step: 14, text: 'Click on the logo whenever you want to return to the home page', pos: 'left' },
-        account: { step: 15, text: 'Here you can manage your account', pos: 'right' },
+        pollution: { step: 15, text: 'Find out more about pollution and how it affects the environment', pos: 'top' },
+        account: { step: 16, text: 'Manage your account and alerts', pos: 'right' },
         map: {
-          step: 16,
+          step: 17,
           text: 'Remember that our map is completely interactive! You can use your cursor to navigate around'
            + '<br />* Dragging the map around will let you change the current view position'
            + '<br />* Scrolling up and down will let you zoom in and out'
            + '<br />* Clicking on any region will warp to that region and load the subunits',
           pos: 'top',
         },
-        restart: { step: 17, text: 'If you missed anything in the tutorial, clicking this button will display the overview page', pos: 'right', button: 'Finish' },
+        restart: { step: 18, text: 'If you missed anything in the tutorial, this button will display the overview page', pos: 'right', button: 'Finish' },
       },
       navButtons: {
         team: { name: 'team', icon: 'group', text: 'Our Team', type: 'menu', href: { name: 'team' } },
-        about: { name: 'pollution', icon: 'leaf', text: 'Pollution', type: 'menu', href: { name: 'pollution' } },
+        pollution: { name: 'pollution', icon: 'leaf', text: 'Pollution', type: 'menu', href: { name: 'pollution' } },
       },
       account: {
         name: 'account',
