@@ -37,7 +37,7 @@ export default {
     return {
       form: {
         title: 'Authenticate',
-        action: 'http://18.191.197.201:8090/user/auth',
+        action: '/user/auth',
         input: {
           userName: { icon: 'person', type: 'text', placeholder: 'USERNAME' },
           password: { icon: 'lock', type: 'password', placeholder: 'PASSWORD' },

@@ -64,7 +64,7 @@ export default {
       };
       try {
         this.$set(this.control.email, 'pending', true);
-        await axios.post('http://18.191.197.201:8090/email', data);
+        await axios.post('/email', data);
       } catch (e) {
         console.error(e);
       }
@@ -78,7 +78,7 @@ export default {
       };
       try {
         this.$set(this.control.sms, 'pending', true);
-        await axios.post('http://18.191.197.201:8090/text', data);
+        await axios.post('/text', data);
       } catch (e) {
         console.error(e);
       }

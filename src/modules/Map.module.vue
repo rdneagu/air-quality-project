@@ -86,8 +86,8 @@ export default {
   async mounted() {
     this.$store.commit('setMapState', { initiating: true, loading: true });
     await this.$nextTick();
-    // const worldSeriesResult = await axios.get('http://3.22.57.250:8090/map');
-    const worldSeriesResult = await axios.get('/api/getWorld');
+    const worldSeriesResult = await axios.get('/map');
+    console.log(worldSeriesResult);
     const map = am4create(this.$refs.map, am4MapChart);
     this.map.model = map;
     map.projection = new am4projections.Mercator();
@@ -125,8 +125,7 @@ export default {
         try {
           this.$store.commit('setMapState', { status: 'pending' });
           const promises = _.map(worldSeries.data, (r) => {
-            const response = axios.get(`https://api.waqi.info/feed/geo:${r.capital.geo[0]};${r.capital.geo[1]}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
-            // const response = axios.get(`http://codegod.xyz:8090/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
+            const response = axios.get(`/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
             return response;
           });
           const aqifeed = await Promise.all(promises);
@@ -321,8 +320,7 @@ export default {
           this.map.zoom.threshold = target.series.chart.zoomLevel;
           // If country is not cached, request data from the server and cache it for later use
           if (!this.$store.getters.getCache(`country_${code}`)) {
-            // const response = await axios.get(`http://codegod.xyz:8090/countryMap?countryCode=${code}`);
-            const response = await axios.get(`/api/getCountry?country=${code}`);
+            const response = await axios.get(`/countryMap?countryCode=${code}`);
             this.$store.commit('setCache', { name: `country_${code}`, data: response.data });
           }
           // Set the series geodata and show the country series
@@ -331,7 +329,7 @@ export default {
             if (!this.$store.getters.getCountryData(code)) {
               try {
                 const promises = _.map(this.map.series.countrySeries.mapPolygons.values, (cityPolygon) => {
-                  const response = axios.get(`https://api.waqi.info/feed/geo:${cityPolygon.latitude};${cityPolygon.longitude}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+                  const response = axios.get(`/realTime?latitude=${cityPolygon.latitude}&longitude=${cityPolygon.longitude}`);
                   return response;
                 });
                 const aqifeed = await Promise.all(promises);

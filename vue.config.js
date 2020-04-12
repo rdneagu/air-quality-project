@@ -14,8 +14,18 @@ module.exports = {
   },
   devServer: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
+      '/map': {
+        target: 'http://localhost:5000/',
+        ws: true,
+        changeOrigin: true,
+      },
+      '/countryMap': {
+        target: 'http://localhost:5000/',
+        ws: true,
+        changeOrigin: true,
+      },
+      '/realTime': {
+        target: 'http://localhost:5000/',
         ws: true,
         changeOrigin: true,
       },
