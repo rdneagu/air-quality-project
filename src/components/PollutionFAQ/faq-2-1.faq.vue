@@ -9,7 +9,3 @@
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.faq.faq-2-1 .content { }
-</style>

@@ -18,10 +18,26 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  .faq-text { margin-right: 40px; }
+  @media (min-width: 1100px) {
+    flex-direction: row;
+    align-items: center;
+    .faq-text { margin-right: 40px; }
+    .chart-1 {
+      flex: 0 0 500px;
+      height: 250px;
+    }
+  }
+  @media (max-width: 1100px) {
+    flex-direction: column;
+    align-items: flex-start;
+    .faq-text { margin-right: 0; }
+    .chart-1 {
+      width: 750px;
+      align-self: center;
+      flex: 0 0 375px;
+    }
+  }
   .chart-1 {
-    flex: 0 0 500px;
-    height: 250px;
     background: url('~@/assets/images/primary-pollutants.jpg') no-repeat center center / cover;
   }
 }

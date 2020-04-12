@@ -29,7 +29,3 @@
     </ul>
   </div>
 </template>
-
-<style lang="scss">
-.faq.faq-2-4 .content { }
-</style>

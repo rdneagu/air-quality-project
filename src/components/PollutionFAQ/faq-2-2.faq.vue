@@ -20,7 +20,3 @@
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.faq.faq-2-2 .content { }
-</style>
