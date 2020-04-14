@@ -27,7 +27,9 @@ export default {
           members: [
             {
               name: 'Cora',
-              about: 'Placeholder',
+              about: 'Third-year Computing student living in Glasgow. \
+                      Her academic interests include mathematics, ui/ux design and data science. \
+                      Interests outside university are health, cooking, exercising and dancing.',
             },
             {
               name: 'Daniela',
@@ -58,7 +60,7 @@ export default {
           members: [
             {
               name: 'James',
-              about: 'Placeholder',
+              about: 'Third-year Computing student commuting to Glasgow with an interest in computing science.',
             },
             {
               name: 'Euan',

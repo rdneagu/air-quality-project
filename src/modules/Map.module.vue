@@ -87,7 +87,6 @@ export default {
     this.$store.commit('setMapState', { initiating: true, loading: true });
     await this.$nextTick();
     const worldSeriesResult = await axios.get('/map');
-    console.log(worldSeriesResult);
     const map = am4create(this.$refs.map, am4MapChart);
     this.map.model = map;
     map.projection = new am4projections.Mercator();
@@ -124,24 +123,25 @@ export default {
       const load = async () => {
         try {
           this.$store.commit('setMapState', { status: 'pending' });
-          const promises = _.map(worldSeries.data, (r) => {
-            const response = axios.get(`/realTime?latitude=${r.capital.geo[0]}&longitude=${r.capital.geo[1]}`);
-            return response;
-          });
-          const aqifeed = await Promise.all(promises);
-          const data = _.map(aqifeed, (country, id) => {
-            const mapping = { id };
-            if (country.data.status === 'ok') {
-              return {
-                ...mapping,
-                name: this.map.series.worldSeries.data[id].name,
-                code: this.map.series.worldSeries.data[id].id,
-                aqi: { ...country.data.data.iaqi, smart: { v: country.data.data.aqi } },
-                dominent: country.data.data.dominentpol,
-              };
-            }
-            return mapping;
-          });
+          const request = _.map(worldSeries.data, (r, id) => ({ id, lat: r.capital.geo[0], lon: r.capital.geo[1] }));
+          const response = await axios.post('/realTime', { coords: request });
+          console.log(response.data);
+          const data = _(response.data)
+            .sortBy('id')
+            .map((country, id) => {
+              const mapping = { id };
+              if (country.aqi) {
+                return {
+                  ...mapping,
+                  name: this.map.series.worldSeries.data[id].name,
+                  code: this.map.series.worldSeries.data[id].id,
+                  aqi: { ...country.iaqi, smart: { v: country.aqi } },
+                  dominent: country.dominent,
+                };
+              }
+              return mapping;
+            })
+            .value();
           setTimeout(() => {
             this.$store.state.sidebar.visible = true;
             this.$store.commit('setMapOverlay', true);
@@ -152,7 +152,7 @@ export default {
           this.showWorld();
         } catch (e) {
           const retries = (this.$store.getters.getMapState.retries || 0) + 1;
-          const timeout = (this.$store.getters.getMapState.timeout || 5000) * 2;
+          const timeout = retries * 10000;
           this.$store.commit('setMapState', { retries, timeout, status: 'failed' });
           setTimeout(async () => { await load(); }, timeout);
         }
@@ -328,24 +328,24 @@ export default {
           this.map.series.countrySeries.events.once('datavalidated', async () => {
             if (!this.$store.getters.getCountryData(code)) {
               try {
-                const promises = _.map(this.map.series.countrySeries.mapPolygons.values, (cityPolygon) => {
-                  const response = axios.get(`/realTime?latitude=${cityPolygon.latitude}&longitude=${cityPolygon.longitude}`);
-                  return response;
-                });
-                const aqifeed = await Promise.all(promises);
-                const data = _.map(aqifeed, (city, id) => {
-                  const mapping = { id };
-                  if (city.data.status === 'ok') {
-                    return {
-                      ...mapping,
-                      name: this.map.series.countrySeries.data[id].name,
-                      code,
-                      aqi: { ...city.data.data.iaqi, smart: { v: city.data.data.aqi } },
-                      dominent: city.data.data.dominentpol,
-                    };
-                  }
-                  return mapping;
-                });
+                const request = _.map(this.map.series.countrySeries.mapPolygons.values, (city, id) => ({ id, lat: city.latitude, lon: city.longitude }));
+                const response = await axios.post('/realTime', { coords: request });
+                const data = _(response.data)
+                  .sortBy('id')
+                  .map((country, id) => {
+                    const mapping = { id };
+                    if (country.aqi) {
+                      return {
+                        ...mapping,
+                        name: this.map.series.countrySeries.data[id].name,
+                        code,
+                        aqi: { ...country.iaqi, smart: { v: country.aqi } },
+                        dominent: country.dominent,
+                      };
+                    }
+                    return mapping;
+                  })
+                  .value();
                 this.$store.commit('setCountryData', { country: code, data });
               } catch (e) {
                 this.$store.commit('setMapState', { status: 'failed' });

@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
+const _ = require('lodash');
 const api = require('./routes/api');
 
 const worldMap = require('./geodata/worldMapCountries.json');
@@ -26,11 +27,27 @@ app.get('/countryMap', (req, res) => {
   res.send(json);
 });
 
-app.get('/realTime', async (req, res) => {
-  const { latitude, longitude } = req.query;
+app.post('/realTime', async (req, res) => {
+  const { coords } = req.body;
+  const promises = _.map(coords, (r) => {
+    const response = axios.get(`https://api.waqi.info/feed/geo:${r.lat};${r.lon}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
+    return response;
+  });
   try {
-    const response = await axios.get(`https://api.waqi.info/feed/geo:${latitude};${longitude}/?token=d3b80dc36410993d538776db2c79b3083ad14edf`);
-    res.send(response.data);
+    const aqifeed = await Promise.all(promises);
+    const data = _.map(aqifeed, (country, id) => {
+      const mapping = { id: coords[id].id };
+      if (country.data.status === 'ok') {
+        return {
+          ...mapping,
+          aqi: country.data.data.aqi,
+          iaqi: country.data.data.iaqi,
+          dominent: country.data.data.dominentpol,
+        };
+      }
+      return mapping;
+    });
+    res.json(data);
   } catch (e) {
     res.status(500).send(e);
   }
