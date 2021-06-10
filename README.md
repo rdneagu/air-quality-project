@@ -1,4 +1,4 @@
-# air-pollution-website
+# Air Quality
 
 ## Project setup
 ```
